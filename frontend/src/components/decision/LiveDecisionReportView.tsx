@@ -7,7 +7,7 @@ import { ON_CHAIN_INTEGRITY_ERROR, safeExternalHref } from '../../lib/decisionRe
 import { liveCandidateRecordPath, livePackagePath } from '../../lib/registrationValidation';
 import { HashField } from './HashField';
 import { EvaluateCandidatePanel } from '../candidate/EvaluateCandidatePanel';
-import { isCandidateEvaluationEligible } from '../../lib/evaluationEligibility';
+import { isEvaluableStatus } from '../../lib/evaluationEligibility';
 
 const PRESENTATION: Record<
   CompletedVerdictStatus,
@@ -245,7 +245,7 @@ export const LiveDecisionReportView: React.FC<{ inspection: LiveDecisionInspecti
               Evaluation Pending
             </h1>
             <p className="text-base mt-4 max-w-3xl leading-relaxed">
-              This candidate has no completed verdict. Request Evaluation from this page starts the first attempt.
+              This candidate has no completed verdict. Request Evaluation is available while attempts remain below the contract maximum.
             </p>
           </section>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -258,7 +258,7 @@ export const LiveDecisionReportView: React.FC<{ inspection: LiveDecisionInspecti
             />
           </div>
           <IdentityPanel inspection={inspection} />
-          {isCandidateEvaluationEligible(candidate.status) ? (
+          {isEvaluableStatus(candidate.status) ? (
             <EvaluateCandidatePanel candidate={candidate} packageRecord={packageRecord} />
           ) : null}
           <Link

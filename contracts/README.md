@@ -268,8 +268,11 @@ After consensus, the contract increments `evaluation_attempts`, stores `status`,
 ## Retry Behavior
 
 - `APPROVED`, `REVIEW_REQUIRED`, and `VIOLATION` are terminal and cannot be evaluated again.
-- `EVIDENCE_UNAVAILABLE` may be retried through the same `evaluate_candidate` method.
-- Maximum three total evaluation attempts.
+- `EVIDENCE_UNAVAILABLE` may be retried through the same `evaluate_candidate` method while attempts are below 3.
+- Maximum evaluation attempts is 3. Both `PENDING` and `EVIDENCE_UNAVAILABLE` require attempts below 3.
+- Attempts 0, 1, and 2 may submit the next evaluation. Attempts 3 or higher are blocked.
+- A third `EVIDENCE_UNAVAILABLE` result cannot be retried.
+- The frontend rechecks the attempt limit before fee estimation and immediately before writing. There are no automatic retries.
 - After three unavailable attempts, further evaluation is rejected.
 - `evaluation_attempts` begins at zero when the candidate is submitted.
 - A terminal result is never overwritten.

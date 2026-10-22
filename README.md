@@ -226,7 +226,7 @@ The active Studio-dev contract at `0xCdf0410A2883c27983d5C3062E40F88dfc83c5E3` e
 
 ### Live candidate evaluation
 
-`evaluate_candidate(candidate_id)` is a frontend wallet write. Any connected Studio-dev wallet may request evaluation of a **PENDING** candidate or explicitly retry an **EVIDENCE_UNAVAILABLE** candidate. Each attempt is a new transaction and GenLayer fee. The caller does not become the package owner. The contract (not the caller) produces the verdict. **APPROVED**, **REVIEW_REQUIRED**, and **VIOLATION** are terminal.
+`evaluate_candidate(candidate_id)` is a frontend wallet write. Any connected Studio-dev wallet may request evaluation of a **PENDING** candidate or explicitly retry an **EVIDENCE_UNAVAILABLE** candidate while `evaluation_attempts` is 0, 1, or 2. The contract maximum is 3 attempts. Status **PENDING** or **EVIDENCE_UNAVAILABLE** still requires attempts below 3. A third **EVIDENCE_UNAVAILABLE** result cannot be retried. The frontend rechecks the attempt limit before fee estimation and immediately before writing. Retries are never automatic. Each allowed attempt is a new transaction and GenLayer fee. The caller does not become the package owner. The contract (not the caller) produces the verdict. **APPROVED**, **REVIEW_REQUIRED**, and **VIOLATION** are terminal.
 
 The UI estimates the exact `evaluate_candidate` fee, requires an explicit **Request Evaluation** click, re-reads the candidate immediately before `writeContract`, stores an immutable public transaction snapshot, classifies the GenLayer receipt with `isSuccessful`, and verifies the finalized `get_candidate` / `get_package` read-back including the canonical decision hash. **Check Existing Transaction** only waits on that hash and never submits again.
 

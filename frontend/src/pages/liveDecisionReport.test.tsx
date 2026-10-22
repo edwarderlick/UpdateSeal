@@ -327,6 +327,46 @@ describe('live candidate decision reports', () => {
     expect(screen.queryByTestId('view-decision-report')).not.toBeInTheDocument();
   });
 
+  it('detail, review, and decision screens all show the attempt limit for PENDING at 3 attempts', async () => {
+    const exhausted = {
+      ...APPROVED_CANDIDATE,
+      status: 'PENDING' as const,
+      decision_code: 0,
+      decision_summary: '',
+      evaluation_attempts: 3,
+      finding_codes_json: '',
+      decision_hash: '',
+    };
+    seedLiveReads(exhausted);
+    for (const path of [DETAIL_PATH, REVIEW_PATH, DECISION_PATH]) {
+      const view = renderLive(path);
+      expect(await screen.findByTestId('evaluation-attempts-exhausted')).toBeInTheDocument();
+      expect(screen.queryByTestId('request-evaluation')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('retry-evaluation')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('connect-to-evaluate')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('estimate-evaluation-fee')).not.toBeInTheDocument();
+      view.unmount();
+    }
+    expect(openWalletModal).not.toHaveBeenCalled();
+  });
+
+  it('EVIDENCE_UNAVAILABLE at 3 attempts shows the attempt limit on the decision report', async () => {
+    seedLiveReads({
+      ...APPROVED_CANDIDATE,
+      status: 'EVIDENCE_UNAVAILABLE',
+      decision_code: 4,
+      decision_summary: 'Evidence could not be fetched',
+      evaluation_attempts: 3,
+      finding_codes_json: '["EVIDENCE_FETCH_FAILED"]',
+    });
+    renderLive(DECISION_PATH);
+    expect(await screen.findByTestId('evaluation-attempts-exhausted')).toBeInTheDocument();
+    expect(screen.queryByTestId('retry-evaluation')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('connect-to-evaluate')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('estimate-evaluation-fee')).not.toBeInTheDocument();
+    expect(openWalletModal).not.toHaveBeenCalled();
+  });
+
   it('routes an APPROVED live review path to the decision report instead of a stale pending tracker', async () => {
     seedLiveReads();
     renderLive(REVIEW_PATH);

@@ -33,6 +33,7 @@ export interface EvaluateCandidateViewState {
   confirmation: EvaluationConfirmation | null;
   estimate: EvaluationFeeEstimate | null;
   resultStatus: string | null;
+  resultAttempts: number | null;
 }
 
 const INITIAL_STATE: EvaluateCandidateViewState = {
@@ -43,6 +44,7 @@ const INITIAL_STATE: EvaluateCandidateViewState = {
   confirmation: null,
   estimate: null,
   resultStatus: null,
+  resultAttempts: null,
 };
 
 export function useEvaluateCandidate(
@@ -100,24 +102,31 @@ export function useEvaluateCandidate(
       estimate: null,
       phase: current.pendingSnapshot ? current.phase : 'idle',
     }));
-  }, [wallet.address, wallet.chainId, candidateId]);
+  }, [wallet.address, wallet.chainId, candidateId, args.candidate?.status, args.candidate?.evaluation_attempts]);
 
   const applyResult = useCallback(
     (result: EvaluateCandidateResult) => {
       if (result.ok && result.phase === 'finalized') {
         snapshotRef.current = null;
         confirmationRef.current = null;
+        const remainingUnavailable = result.success.status === 'EVIDENCE_UNAVAILABLE';
+        const attemptsExhausted = remainingUnavailable && !isCandidateEvaluationEligible(
+          result.success.status,
+          result.success.record.evaluation_attempts,
+        );
         setView({
           phase: 'finalized',
-          message:
-            result.success.status === 'EVIDENCE_UNAVAILABLE'
-              ? 'Evaluation transaction succeeded. Evidence remains unavailable. A future retry requires a new confirmation, fee, and transaction.'
-              : `Evaluation complete. Status: ${result.success.status}.`,
+          message: remainingUnavailable
+            ? attemptsExhausted
+              ? 'Evaluation transaction succeeded. Evidence remains unavailable. Maximum evaluation attempts reached. The deployed contract will reject additional evaluation requests.'
+              : 'Evaluation transaction succeeded. Evidence remains unavailable. A future retry requires a new confirmation, fee, and transaction.'
+            : `Evaluation complete. Status: ${result.success.status}.`,
           transactionHash: result.success.transactionHash,
           pendingSnapshot: null,
           confirmation: null,
           estimate: null,
           resultStatus: result.success.status,
+          resultAttempts: result.success.record.evaluation_attempts,
         });
         void queryClient.invalidateQueries({ queryKey: registryQueryKeys.all });
         return;
@@ -132,6 +141,7 @@ export function useEvaluateCandidate(
           confirmation: result.confirmation,
           estimate: result.estimate,
           resultStatus: null,
+          resultAttempts: null,
         });
         return;
       }
@@ -139,17 +149,21 @@ export function useEvaluateCandidate(
         if (result.snapshot) {
           snapshotRef.current = result.snapshot;
         }
+        const dropConfirmation =
+          result.phase === 'stale_confirmation' || result.phase === 'max_evaluation_attempts';
         setView({
           phase: result.phase,
           message: result.message,
           transactionHash: result.transactionHash ?? snapshotRef.current?.transactionHash ?? null,
           pendingSnapshot: result.snapshot ?? snapshotRef.current,
-          confirmation: result.phase === 'stale_confirmation' ? null : confirmationRef.current,
-          estimate: result.phase === 'stale_confirmation' ? null : confirmationRef.current?.estimate ?? null,
+          confirmation: dropConfirmation ? null : confirmationRef.current,
+          estimate: dropConfirmation ? null : confirmationRef.current?.estimate ?? null,
           resultStatus: null,
+          resultAttempts: null,
         });
-        if (result.phase === 'stale_confirmation') {
+        if (dropConfirmation) {
           confirmationRef.current = null;
+          void queryClient.invalidateQueries({ queryKey: registryQueryKeys.all });
         }
       }
     },
@@ -281,9 +295,9 @@ export function useEvaluateCandidate(
     openWalletModal();
   }, [openWalletModal]);
 
-  const evaluationAction = getEvaluationAction(args.candidate?.status);
+  const evaluationAction = getEvaluationAction(args.candidate?.status, args.candidate?.evaluation_attempts);
   const pending = evaluationAction === 'request';
-  const eligible = isCandidateEvaluationEligible(args.candidate?.status);
+  const eligible = isCandidateEvaluationEligible(args.candidate?.status, args.candidate?.evaluation_attempts);
   const completed = isTerminalEvaluationStatus(args.candidate?.status);
   const canEstimate =
     eligible &&

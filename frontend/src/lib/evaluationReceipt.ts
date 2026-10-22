@@ -11,7 +11,7 @@ import {
   type CompletedVerdictStatus,
 } from './decisionReport';
 import { parseCandidateId } from './candidateId';
-import { isCandidateEvaluationEligible, type EvaluableCandidateStatus } from './evaluationEligibility';
+import { isEvaluableStatus, type EvaluableCandidateStatus } from './evaluationEligibility';
 import type {
   OnChainCandidateRecord,
   OnChainPackageRecord,
@@ -46,7 +46,7 @@ export function createPendingEvaluationSnapshot(args: {
   submitter: string;
   submittedAtLocal?: string;
 }): PendingEvaluationSnapshot {
-  if (!isCandidateEvaluationEligible(args.originalStatus)) {
+  if (!isEvaluableStatus(args.originalStatus)) {
     throw new Error('Evaluation snapshot originalStatus must be PENDING or EVIDENCE_UNAVAILABLE.');
   }
   return Object.freeze({

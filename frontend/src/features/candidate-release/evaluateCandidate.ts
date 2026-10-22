@@ -5,7 +5,13 @@ import {
   type GenLayerReadClient,
 } from '../../lib/genlayerClient';
 import { parseCandidateId } from '../../lib/candidateId';
-import { isCandidateEvaluationEligible } from '../../lib/evaluationEligibility';
+import {
+  isCandidateEvaluationEligible,
+  isEvaluableStatus,
+  MAX_EVALUATION_ATTEMPTS,
+  maxEvaluationAttemptsUserMessage,
+  parseEvaluationAttempts,
+} from '../../lib/evaluationEligibility';
 import {
   clearEvaluationSnapshot,
   loadEvaluationSnapshot,
@@ -35,6 +41,7 @@ export type EvaluatePhase =
   | 'wrong_network'
   | 'candidate_not_pending'
   | 'candidate_not_evaluatable'
+  | 'max_evaluation_attempts'
   | 'candidate_not_found'
   | 'invalid_candidate_id'
   | 'estimating_fees'
@@ -111,6 +118,7 @@ function phaseFromError(error: UpdateSealError, snapshot?: PendingEvaluationSnap
     CONTRACT_NOT_FOUND: 'candidate_not_found',
     CANDIDATE_NOT_PENDING: 'candidate_not_evaluatable',
     CANDIDATE_NOT_EVALUATABLE: 'candidate_not_evaluatable',
+    MAX_EVALUATION_ATTEMPTS: 'max_evaluation_attempts',
     EVALUATION_ALREADY_PENDING: 'evaluation_already_pending',
     FEE_ESTIMATION_FAILED: 'fee_estimation_failed',
     FEE_ESTIMATE_INVALID: 'fee_estimate_invalid',
@@ -185,7 +193,23 @@ export async function assertEvaluateEligibility(
     throw new UpdateSealError('CANDIDATE_NOT_FOUND', `Candidate '${parsed.candidateId}' was not found.`);
   }
   const record = await getCandidateFn(parsed.candidateId);
-  if (!isCandidateEvaluationEligible(record.status)) {
+  if (!isEvaluableStatus(record.status)) {
+    throw new UpdateSealError(
+      'CANDIDATE_NOT_EVALUATABLE',
+      'This candidate cannot be evaluated from its current status.',
+    );
+  }
+  const attempts = parseEvaluationAttempts(record.evaluation_attempts);
+  if (attempts === null) {
+    throw new UpdateSealError(
+      'DECISION_INTEGRITY_ERROR',
+      'evaluation_attempts is not a valid integer attempt count.',
+    );
+  }
+  if (attempts >= MAX_EVALUATION_ATTEMPTS) {
+    throw new UpdateSealError('MAX_EVALUATION_ATTEMPTS', maxEvaluationAttemptsUserMessage());
+  }
+  if (!isCandidateEvaluationEligible(record.status, record.evaluation_attempts)) {
     throw new UpdateSealError(
       'CANDIDATE_NOT_EVALUATABLE',
       'This candidate cannot be evaluated from its current status.',
@@ -216,7 +240,7 @@ export function confirmationFromRecord(args: {
     evidenceUri: args.record.evidence_uri,
     evidenceHash: args.record.evidence_hash,
     submitter: args.record.submitter,
-    originalStatus: isCandidateEvaluationEligible(args.record.status) ? args.record.status : 'PENDING',
+    originalStatus: isEvaluableStatus(args.record.status) ? args.record.status : 'PENDING',
     originalEvaluationAttempts: args.record.evaluation_attempts,
     callerAddress: args.sender,
     chainId: args.chainId,
@@ -240,8 +264,11 @@ export function confirmationIsStale(
   if (live.record.status !== confirmation.originalStatus) {
     return `Candidate status changed from ${confirmation.originalStatus} to ${live.record.status}.`;
   }
-  if (!isCandidateEvaluationEligible(live.record.status)) {
+  if (!isEvaluableStatus(live.record.status)) {
     return 'This candidate cannot be evaluated from its current status.';
+  }
+  if (!isCandidateEvaluationEligible(live.record.status, live.record.evaluation_attempts)) {
+    return 'This candidate cannot be evaluated from its current status or attempt count.';
   }
   if (live.record.evaluation_attempts !== confirmation.originalEvaluationAttempts) {
     return 'evaluation_attempts changed.';

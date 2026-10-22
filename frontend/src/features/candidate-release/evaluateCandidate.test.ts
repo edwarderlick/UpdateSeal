@@ -250,6 +250,87 @@ describe('evaluateCandidate orchestration', () => {
     expect(evaluateFn).not.toHaveBeenCalled();
   });
 
+  it.each([0, 1, 2] as const)('PENDING attempts %s remains eligible for fee estimation', async (attempts) => {
+    getCandidateFn.mockResolvedValue({ ...PENDING, evaluation_attempts: attempts });
+    const result = await estimateLiveEvaluation(liveInput(), deps);
+    expect(result).toMatchObject({ ok: true, phase: 'ready' });
+    if (result.ok && result.phase === 'ready') {
+      expect(result.confirmation.originalEvaluationAttempts).toBe(attempts);
+    }
+    expect(evaluateFn).not.toHaveBeenCalled();
+    expect(writeContract).not.toHaveBeenCalled();
+  });
+
+  it.each([3, 4] as const)(
+    'PENDING attempts %s blocks estimation with zero fee, write-client, write, and signing calls',
+    async (attempts) => {
+      getCandidateFn.mockResolvedValue({ ...PENDING, evaluation_attempts: attempts });
+      const result = await estimateLiveEvaluation(liveInput(), deps);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.phase).toBe('max_evaluation_attempts');
+        expect(result.message).toMatch(/at most 3 attempts/i);
+      }
+      expect(estimateFn).not.toHaveBeenCalled();
+      expect(createWriteClientFn).not.toHaveBeenCalled();
+      expect(evaluateFn).not.toHaveBeenCalled();
+      expect(writeContract).not.toHaveBeenCalled();
+    },
+  );
+
+  it('EVIDENCE_UNAVAILABLE attempts 0, 1, and 2 remain eligible', async () => {
+    for (const attempts of [0, 1, 2]) {
+      estimateFn.mockClear();
+      createWriteClientFn.mockClear();
+      getCandidateFn.mockResolvedValue({
+        ...PENDING,
+        status: 'EVIDENCE_UNAVAILABLE',
+        evaluation_attempts: attempts,
+      });
+      const result = await estimateLiveEvaluation(liveInput(), deps);
+      expect(result).toMatchObject({ ok: true, phase: 'ready' });
+    }
+  });
+
+  it('EVIDENCE_UNAVAILABLE attempts 3 blocks estimation and writes', async () => {
+    getCandidateFn.mockResolvedValue({
+      ...PENDING,
+      status: 'EVIDENCE_UNAVAILABLE',
+      evaluation_attempts: 3,
+    });
+    const result = await estimateLiveEvaluation(liveInput(), deps);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.phase).toBe('max_evaluation_attempts');
+    }
+    expect(estimateFn).not.toHaveBeenCalled();
+    expect(createWriteClientFn).not.toHaveBeenCalled();
+    expect(evaluateFn).not.toHaveBeenCalled();
+    expect(writeContract).not.toHaveBeenCalled();
+  });
+
+  it('malformed evaluation_attempts blocks estimation as an integrity error', async () => {
+    for (const attempts of [-1, 1.5, Number.NaN, Number.POSITIVE_INFINITY, '2', null, undefined]) {
+      estimateFn.mockClear();
+      createWriteClientFn.mockClear();
+      evaluateFn.mockClear();
+      writeContract.mockClear();
+      getCandidateFn.mockResolvedValue({
+        ...PENDING,
+        evaluation_attempts: attempts as number,
+      });
+      const result = await estimateLiveEvaluation(liveInput(), deps);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.phase).toBe('decision_integrity_error');
+      }
+      expect(estimateFn).not.toHaveBeenCalled();
+      expect(createWriteClientFn).not.toHaveBeenCalled();
+      expect(evaluateFn).not.toHaveBeenCalled();
+      expect(writeContract).not.toHaveBeenCalled();
+    }
+  });
+
   it('zero/malformed estimate is returned as fee failure without write', async () => {
     estimateFn.mockRejectedValue(new UpdateSealError('FEE_ESTIMATE_INVALID', 'Fee estimation failed'));
     const result = await estimateLiveEvaluation(liveInput(), deps);
@@ -518,7 +599,7 @@ describe('evaluateCandidate orchestration', () => {
   });
 
   it('EVIDENCE_UNAVAILABLE attempts change before write performs zero writes', async () => {
-    getCandidateFn.mockResolvedValue({ ...PENDING, status: 'EVIDENCE_UNAVAILABLE', evaluation_attempts: 3 });
+    getCandidateFn.mockResolvedValue({ ...PENDING, status: 'EVIDENCE_UNAVAILABLE', evaluation_attempts: 2 });
     const result = await submitLiveEvaluation(
       {
         ...liveInput(),
@@ -531,6 +612,75 @@ describe('evaluateCandidate orchestration', () => {
       expect(result.phase).toBe('stale_confirmation');
     }
     expect(evaluateFn).not.toHaveBeenCalled();
+    expect(createWriteClientFn).not.toHaveBeenCalled();
+    expect(writeContract).not.toHaveBeenCalled();
+  });
+
+  it('attempts changing from 2 to 3 after estimation is MAX_EVALUATION_ATTEMPTS with zero writes', async () => {
+    const ready = confirmation({ originalEvaluationAttempts: 2 });
+    getCandidateFn.mockResolvedValue({ ...PENDING, evaluation_attempts: 3 });
+    const result = await submitLiveEvaluation({ ...liveInput(), confirmation: ready }, deps);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.phase).toBe('max_evaluation_attempts');
+    }
+    expect(estimateFn).not.toHaveBeenCalled();
+    expect(createWriteClientFn).not.toHaveBeenCalled();
+    expect(evaluateFn).not.toHaveBeenCalled();
+    expect(writeContract).not.toHaveBeenCalled();
+  });
+
+  it('a fee estimated at attempt 2 cannot be reused at attempt 3', async () => {
+    getCandidateFn.mockResolvedValue({ ...PENDING, evaluation_attempts: 2 });
+    const estimated = await estimateLiveEvaluation(liveInput(), deps);
+    expect(estimated.ok).toBe(true);
+    if (!estimated.ok || estimated.phase !== 'ready') {
+      throw new Error('expected ready confirmation');
+    }
+    expect(estimated.confirmation.originalEvaluationAttempts).toBe(2);
+    getCandidateFn.mockResolvedValue({ ...PENDING, evaluation_attempts: 3 });
+    const result = await submitLiveEvaluation(
+      { ...liveInput(), confirmation: estimated.confirmation },
+      deps,
+    );
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.phase).toBe('max_evaluation_attempts');
+    }
+    expect(evaluateFn).not.toHaveBeenCalled();
+    expect(writeContract).not.toHaveBeenCalled();
+  });
+
+  it('retry starting at attempt 2 and ending EVIDENCE_UNAVAILABLE at attempt 3 is a successful transaction', async () => {
+    const unavailable = {
+      ...PENDING,
+      status: 'EVIDENCE_UNAVAILABLE' as const,
+      evaluation_attempts: 2,
+      decision_code: 4,
+      decision_summary: 'Evidence could not be fetched',
+      finding_codes_json: '["EVIDENCE_FETCH_FAILED"]',
+    };
+    getCandidateFn.mockResolvedValue(unavailable);
+    const retryConfirmation = confirmation({
+      originalStatus: 'EVIDENCE_UNAVAILABLE',
+      originalEvaluationAttempts: 2,
+    });
+    const after = { ...unavailable, evaluation_attempts: 3 };
+    evaluateFn.mockResolvedValue({
+      transactionHash: TX,
+      candidateId: PENDING.candidate_id,
+      record: after,
+      packageRecord: PACKAGE,
+      consensusStatus: 'FINALIZED',
+      status: 'EVIDENCE_UNAVAILABLE',
+    });
+    const result = await submitLiveEvaluation({ ...liveInput(), confirmation: retryConfirmation }, deps);
+    expect(result.ok).toBe(true);
+    if (result.ok && result.phase === 'finalized') {
+      expect(result.success.status).toBe('EVIDENCE_UNAVAILABLE');
+      expect(result.success.record.evaluation_attempts).toBe(3);
+    }
+    expect(evaluateFn).toHaveBeenCalledTimes(1);
   });
 
   it('PENDING changing to EVIDENCE_UNAVAILABLE before write is stale and performs zero writes', async () => {

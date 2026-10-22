@@ -5,7 +5,7 @@ import { CopyButton } from '../components/ui/CopyButton';
 import { useOnChainCandidate, useOnChainPackageByPublisherSlug } from '../features/registry/registryQueries';
 import { deriveCandidateId } from '../lib/candidateValidation';
 import { inspectLiveDecision, ON_CHAIN_INTEGRITY_ERROR } from '../lib/decisionReport';
-import { isCandidateEvaluationEligible, isTerminalEvaluationStatus } from '../lib/evaluationEligibility';
+import { isEvaluableStatus, isTerminalEvaluationStatus } from '../lib/evaluationEligibility';
 import { getUpdateSealConfigResult, isLiveReadsEnabled } from '../lib/updateSealConfig';
 import { liveCandidateDecisionPath, liveCandidateReviewPath, livePackagePath } from '../lib/registrationValidation';
 import { logUpdateSealError, toUpdateSealError } from '../lib/updateSealErrors';
@@ -93,7 +93,7 @@ export const LiveCandidateDetailPage: React.FC = () => {
 
   const inspection = inspectLiveDecision(record, pkg);
   const completed = isTerminalEvaluationStatus(record.status);
-  const evaluable = isCandidateEvaluationEligible(record.status);
+  const evaluable = isEvaluableStatus(record.status);
   const decisionPath = liveCandidateDecisionPath(pkg.publisher, pkg.package_slug, record.version);
   const reviewPath = liveCandidateReviewPath(pkg.publisher, pkg.package_slug, record.version);
 

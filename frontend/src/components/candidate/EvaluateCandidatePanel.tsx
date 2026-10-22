@@ -3,7 +3,11 @@ import { Link } from 'react-router-dom';
 import { CopyButton } from '../ui/CopyButton';
 import { useEvaluateCandidate } from '../../features/candidate-release/useEvaluateCandidate';
 import { liveCandidateDecisionPath } from '../../lib/registrationValidation';
-import { getEvaluationAction, isTerminalEvaluationStatus } from '../../lib/evaluationEligibility';
+import {
+  getEvaluationAction,
+  isTerminalEvaluationStatus,
+  MAX_EVALUATION_ATTEMPTS,
+} from '../../lib/evaluationEligibility';
 import { getUpdateSealConfigResult, isLiveReadsEnabled } from '../../lib/updateSealConfig';
 import type { OnChainCandidateRecord, OnChainPackageRecord } from '../../types/updateSeal';
 
@@ -34,12 +38,16 @@ export const EvaluateCandidatePanel: React.FC<{
     return null;
   }
 
-  const action = getEvaluationAction(candidate.status);
-  const resultAction = getEvaluationAction(evaluation.view.resultStatus ?? candidate.status);
+  const action = getEvaluationAction(candidate.status, candidate.evaluation_attempts);
+  const resultAction = getEvaluationAction(
+    evaluation.view.resultStatus ?? candidate.status,
+    evaluation.view.resultAttempts ?? candidate.evaluation_attempts,
+  );
   const terminal =
     isTerminalEvaluationStatus(candidate.status) ||
     evaluation.completed ||
     (evaluation.view.phase === 'finalized' && resultAction === 'terminal');
+  const attemptsExhausted = action === 'attempts_exhausted' || resultAction === 'attempts_exhausted';
 
   if (terminal) {
     const status = evaluation.view.resultStatus ?? candidate.status;
@@ -58,12 +66,75 @@ export const EvaluateCandidatePanel: React.FC<{
     );
   }
 
-  if (action === 'unsupported') {
+  if (action === 'unsupported' || action === 'integrity_error') {
     return (
       <div className="bg-white border-2 border-brand-charcoal p-6" role="alert" data-testid="evaluate-unsupported">
         <h2 className="text-xl font-black uppercase">On-chain data integrity error</h2>
         <p className="text-sm">This candidate cannot be evaluated from its current status.</p>
       </div>
+    );
+  }
+
+  if (attemptsExhausted) {
+    const status = evaluation.view.resultStatus ?? candidate.status;
+    const attempts = evaluation.view.resultAttempts ?? candidate.evaluation_attempts;
+    const evidenceStillUnavailable = status === 'EVIDENCE_UNAVAILABLE';
+    return (
+      <section
+        className="bg-white border-2 border-brand-charcoal p-6 space-y-3 shadow-[4px_4px_0px_#0B130E]"
+        data-testid="evaluation-attempts-exhausted"
+        role="status"
+      >
+        <h2 className="text-xl font-black uppercase">Maximum evaluation attempts reached</h2>
+        {evaluation.view.phase === 'finalized' ? (
+          <p className="text-sm" data-testid="evaluate-message">
+            {evaluation.view.message}
+          </p>
+        ) : null}
+        <p className="text-sm max-w-3xl">
+          This candidate has reached the contract limit of {MAX_EVALUATION_ATTEMPTS} evaluation attempts. The
+          deployed contract will reject additional evaluation requests.
+        </p>
+        {evidenceStillUnavailable ? (
+          <p className="text-sm max-w-3xl">
+            Evidence remains unavailable, but the contract does not allow another evaluation attempt. This is not
+            an APPROVED, VIOLATION, or REVIEW_REQUIRED verdict.
+          </p>
+        ) : null}
+        <dl className="grid grid-cols-1 md:grid-cols-2 gap-3 font-mono text-xs">
+          <div>
+            <dt className="font-bold uppercase">Current status</dt>
+            <dd data-testid="exhausted-status">{status}</dd>
+          </div>
+          <div>
+            <dt className="font-bold uppercase">Evaluation attempts</dt>
+            <dd data-testid="exhausted-attempts">{attempts}</dd>
+          </div>
+          <div>
+            <dt className="font-bold uppercase">Maximum attempts</dt>
+            <dd data-testid="exhausted-max-attempts">{MAX_EVALUATION_ATTEMPTS}</dd>
+          </div>
+          <div>
+            <dt className="font-bold uppercase">Candidate ID</dt>
+            <dd className="break-all">{candidate.candidate_id}</dd>
+          </div>
+          <div>
+            <dt className="font-bold uppercase">Decision code</dt>
+            <dd>{candidate.decision_code}</dd>
+          </div>
+          <div>
+            <dt className="font-bold uppercase">Decision summary</dt>
+            <dd className="break-all">{candidate.decision_summary || '(empty)'}</dd>
+          </div>
+        </dl>
+        <Link
+          to={decisionPath}
+          data-testid="view-decision-report"
+          className="inline-flex w-fit bg-white text-brand-charcoal px-5 py-3 text-xs font-bold uppercase border-2 border-brand-charcoal shadow-[4px_4px_0px_#0B130E] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange"
+        >
+          View Decision Report
+        </Link>
+      </section>
     );
   }
 
@@ -106,9 +177,21 @@ export const EvaluateCandidatePanel: React.FC<{
             View Decision Report
           </Link>
         </>
-      ) : (
+      ) : candidate.evaluation_attempts === 0 ? (
         <p className="text-sm max-w-3xl">This starts the candidate's first evaluation attempt.</p>
+      ) : (
+        <p className="text-sm max-w-3xl">This submits the next evaluation attempt for a PENDING candidate.</p>
       )}
+      <p className="text-sm max-w-3xl" data-testid="evaluation-attempts-used">
+        Attempts used: {candidate.evaluation_attempts} of {MAX_EVALUATION_ATTEMPTS}
+      </p>
+      <p className="text-sm max-w-3xl" data-testid="evaluation-attempts-remaining">
+        Attempts remaining before this transaction:{' '}
+        {MAX_EVALUATION_ATTEMPTS - candidate.evaluation_attempts}
+      </p>
+      <p className="text-sm max-w-3xl" data-testid="evaluation-next-attempt">
+        This request will be attempt {candidate.evaluation_attempts + 1} if finalized successfully.
+      </p>
       <p className="text-sm max-w-3xl">
         Any connected wallet may request evaluation. The transaction pays the GenLayer evaluation fee but does not
         transfer package ownership.

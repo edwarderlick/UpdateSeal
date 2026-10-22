@@ -367,6 +367,193 @@ describe('live evaluation UI', () => {
     expect(openWalletModal).not.toHaveBeenCalled();
   });
 
+  it('PENDING attempt 2 shows Request Evaluation and that this request will be attempt 3', async () => {
+    wallet.isConnected = true;
+    wallet.address = '0x82fde1090c2941e5d8742a944813ebfc09c91c12';
+    getCandidate.mockResolvedValue({ ...PENDING, evaluation_attempts: 2 });
+    renderDetail(PENDING.version);
+    expect(await screen.findByTestId('request-evaluation')).toBeInTheDocument();
+    expect(screen.getByTestId('evaluation-next-attempt')).toHaveTextContent(/attempt 3/i);
+    expect(screen.getByTestId('evaluation-attempts-used')).toHaveTextContent('Attempts used: 2 of 3');
+    expect(screen.getByTestId('evaluation-attempts-remaining')).toHaveTextContent(
+      'Attempts remaining before this transaction: 1',
+    );
+    expect(screen.queryByTestId('retry-evaluation')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('evaluation-attempts-exhausted')).not.toBeInTheDocument();
+  });
+
+  it('EVIDENCE_UNAVAILABLE attempt 2 shows Retry Evaluation and that this request will be attempt 3', async () => {
+    wallet.isConnected = true;
+    wallet.address = '0x82fde1090c2941e5d8742a944813ebfc09c91c12';
+    getCandidate.mockResolvedValue({ ...UNAVAILABLE, evaluation_attempts: 2 });
+    renderDetail(UNAVAILABLE.version);
+    expect(await screen.findByTestId('retry-evaluation')).toBeInTheDocument();
+    expect(screen.getByTestId('evaluation-next-attempt')).toHaveTextContent(/attempt 3/i);
+    expect(screen.queryByTestId('request-evaluation')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('evaluation-attempts-exhausted')).not.toBeInTheDocument();
+  });
+
+  it('PENDING attempt 3 shows Maximum evaluation attempts reached and no evaluate actions', async () => {
+    wallet.isConnected = true;
+    wallet.address = '0x82fde1090c2941e5d8742a944813ebfc09c91c12';
+    getCandidate.mockResolvedValue({ ...PENDING, evaluation_attempts: 3 });
+    renderDetail(PENDING.version);
+    expect(await screen.findByTestId('evaluation-attempts-exhausted')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Maximum evaluation attempts reached/i })).toBeInTheDocument();
+    expect(screen.getByTestId('exhausted-attempts')).toHaveTextContent('3');
+    expect(screen.getByTestId('exhausted-max-attempts')).toHaveTextContent('3');
+    expect(screen.getByTestId('exhausted-status')).toHaveTextContent('PENDING');
+    expect(screen.queryByTestId('request-evaluation')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('retry-evaluation')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('connect-to-evaluate')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('estimate-evaluation-fee')).not.toBeInTheDocument();
+    expect(openWalletModal).not.toHaveBeenCalled();
+    expect(estimateLiveEvaluation).not.toHaveBeenCalled();
+    expect(submitLiveEvaluation).not.toHaveBeenCalled();
+  });
+
+  it('EVIDENCE_UNAVAILABLE attempt 3 shows Maximum evaluation attempts reached and no retry', async () => {
+    getCandidate.mockResolvedValue({ ...UNAVAILABLE, evaluation_attempts: 3 });
+    renderDetail(UNAVAILABLE.version);
+    expect(await screen.findByTestId('evaluation-attempts-exhausted')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Maximum evaluation attempts reached/i })).toBeInTheDocument();
+    expect(screen.getByText(/Evidence remains unavailable/i)).toBeInTheDocument();
+    expect(screen.getByText(/does not allow another evaluation attempt/i)).toBeInTheDocument();
+    expect(screen.getByTestId('exhausted-status')).toHaveTextContent('EVIDENCE_UNAVAILABLE');
+    expect(screen.queryByTestId('retry-evaluation')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('request-evaluation')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('connect-to-evaluate')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('estimate-evaluation-fee')).not.toBeInTheDocument();
+    expect(openWalletModal).not.toHaveBeenCalled();
+    expect(estimateLiveEvaluation).not.toHaveBeenCalled();
+    expect(submitLiveEvaluation).not.toHaveBeenCalled();
+  });
+
+  it('attempt 2 becoming attempt 3 before submission invalidates confirmation and writes nothing', async () => {
+    wallet.isConnected = true;
+    wallet.address = '0x82fde1090c2941e5d8742a944813ebfc09c91c12';
+    getCandidate.mockResolvedValue({ ...PENDING, evaluation_attempts: 2 });
+    const confirmation = {
+      candidateId: PENDING.candidate_id,
+      packageUid: PENDING.package_uid,
+      version: PENDING.version,
+      candidateCommitSha: PENDING.candidate_commit_sha,
+      evidenceUri: PENDING.evidence_uri,
+      evidenceHash: PENDING.evidence_hash,
+      submitter: PENDING.submitter,
+      originalStatus: 'PENDING' as const,
+      originalEvaluationAttempts: 2,
+      callerAddress: wallet.address,
+      chainId: 61997,
+      contractAddress: '0xCdf0410A2883c27983d5C3062E40F88dfc83c5E3',
+      estimate: {
+        senderAddress: wallet.address,
+        chainId: 61997,
+        contractAddress: '0xCdf0410A2883c27983d5C3062E40F88dfc83c5E3',
+        method: 'evaluate_candidate' as const,
+        candidateId: PENDING.candidate_id,
+        feeValue: 123n,
+        feeLabel: '0.000000000000000123 GEN',
+        distribution: {},
+        messageAllocations: [],
+      },
+    };
+    estimateLiveEvaluation.mockResolvedValue({
+      ok: true,
+      phase: 'ready',
+      confirmation,
+      estimate: confirmation.estimate,
+    });
+    submitLiveEvaluation.mockResolvedValue({
+      ok: false,
+      phase: 'max_evaluation_attempts',
+      message: 'Maximum evaluation attempts reached. The deployed contract permits at most 3 attempts for this candidate.',
+    });
+    renderDetail(PENDING.version);
+    const user = userEvent.setup();
+    await user.click(await screen.findByTestId('estimate-evaluation-fee'));
+    await waitFor(() => {
+      expect(screen.getByTestId('request-evaluation')).not.toBeDisabled();
+    });
+    getCandidate.mockResolvedValue({ ...PENDING, evaluation_attempts: 3 });
+    await user.click(screen.getByTestId('request-evaluation'));
+    await waitFor(() => {
+      expect(submitLiveEvaluation).toHaveBeenCalledTimes(1);
+    });
+    expect(submitLiveEvaluation).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(screen.getByTestId('evaluation-attempts-exhausted')).toBeInTheDocument();
+    });
+    expect(screen.queryByTestId('request-evaluation')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('estimate-evaluation-fee')).not.toBeInTheDocument();
+  });
+
+  it('finalized EVIDENCE_UNAVAILABLE at attempt 3 is success with no further retry', async () => {
+    wallet.isConnected = true;
+    wallet.address = '0x82fde1090c2941e5d8742a944813ebfc09c91c12';
+    getCandidate.mockResolvedValue({ ...UNAVAILABLE, evaluation_attempts: 2 });
+    const confirmation = {
+      candidateId: UNAVAILABLE.candidate_id,
+      packageUid: UNAVAILABLE.package_uid,
+      version: UNAVAILABLE.version,
+      candidateCommitSha: UNAVAILABLE.candidate_commit_sha,
+      evidenceUri: UNAVAILABLE.evidence_uri,
+      evidenceHash: UNAVAILABLE.evidence_hash,
+      submitter: UNAVAILABLE.submitter,
+      originalStatus: 'EVIDENCE_UNAVAILABLE' as const,
+      originalEvaluationAttempts: 2,
+      callerAddress: wallet.address,
+      chainId: 61997,
+      contractAddress: '0xCdf0410A2883c27983d5C3062E40F88dfc83c5E3',
+      estimate: {
+        senderAddress: wallet.address,
+        chainId: 61997,
+        contractAddress: '0xCdf0410A2883c27983d5C3062E40F88dfc83c5E3',
+        method: 'evaluate_candidate' as const,
+        candidateId: UNAVAILABLE.candidate_id,
+        feeValue: 123n,
+        feeLabel: '0.000000000000000123 GEN',
+        distribution: {},
+        messageAllocations: [],
+      },
+    };
+    estimateLiveEvaluation.mockResolvedValue({
+      ok: true,
+      phase: 'ready',
+      confirmation,
+      estimate: confirmation.estimate,
+    });
+    const after = { ...UNAVAILABLE, evaluation_attempts: 3 };
+    submitLiveEvaluation.mockResolvedValue({
+      ok: true,
+      phase: 'finalized',
+      success: {
+        transactionHash: '0xdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd',
+        candidateId: UNAVAILABLE.candidate_id,
+        record: after,
+        packageRecord: OFFICIAL,
+        consensusStatus: 'FINALIZED',
+        status: 'EVIDENCE_UNAVAILABLE',
+      },
+    });
+    renderDetail(UNAVAILABLE.version);
+    const user = userEvent.setup();
+    await user.click(await screen.findByTestId('estimate-evaluation-fee'));
+    await waitFor(() => {
+      expect(screen.getByTestId('retry-evaluation')).not.toBeDisabled();
+    });
+    await user.click(screen.getByTestId('retry-evaluation'));
+    expect(await screen.findByTestId('evaluation-attempts-exhausted')).toBeInTheDocument();
+    expect(screen.getByTestId('evaluate-message')).toHaveTextContent(/Evaluation transaction succeeded/i);
+    expect(screen.getByTestId('evaluate-message')).toHaveTextContent(/Evidence remains unavailable/i);
+    expect(screen.getByRole('heading', { name: /Maximum evaluation attempts reached/i })).toBeInTheDocument();
+    expect(screen.getAllByText(/Evidence remains unavailable/i).length).toBeGreaterThan(0);
+    expect(screen.queryByTestId('retry-evaluation')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('estimate-evaluation-fee')).not.toBeInTheDocument();
+    expect(submitLiveEvaluation).toHaveBeenCalledTimes(1);
+    expect(estimateLiveEvaluation).toHaveBeenCalledTimes(1);
+  });
+
   it('status_unknown keeps the transaction hash visible', async () => {
     wallet.isConnected = true;
     wallet.address = '0x82fde1090c2941e5d8742a944813ebfc09c91c12';
