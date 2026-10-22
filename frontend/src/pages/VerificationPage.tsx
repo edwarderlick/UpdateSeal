@@ -1,11 +1,33 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CheckCircle2, ShieldAlert, AlertCircle, Copy, Terminal, ExternalLink, ArrowRight } from 'lucide-react';
+import { CheckCircle2, ShieldAlert, AlertCircle, Terminal } from 'lucide-react';
 import { CopyButton } from '../components/ui/CopyButton';
+import { DataModeBadge } from '../components/ui/DataModeBadge';
+import { getUpdateSealConfigResult, isLiveReadsEnabled } from '../lib/updateSealConfig';
+import { LiveVerificationPage } from './LiveVerificationPage';
+
+export const VerificationPage: React.FC = () => {
+  const configResult = getUpdateSealConfigResult();
+  if (!configResult.ok) {
+    return (
+      <div className="bg-brand-cream px-6 py-16" data-testid="verify-config-error">
+        <div className="max-w-xl mx-auto bg-white border-2 border-brand-charcoal p-8 space-y-3">
+          <DataModeBadge />
+          <h1 className="text-2xl font-black uppercase">Configuration Error</h1>
+          <p className="text-xs font-mono">{configResult.error.userMessage}</p>
+        </div>
+      </div>
+    );
+  }
+  if (isLiveReadsEnabled(configResult)) {
+    return <LiveVerificationPage />;
+  }
+  return <DemoVerificationPage />;
+};
 
 type VerdictState = 'approved' | 'blocked' | 'unknown';
 
-export const VerificationPage: React.FC = () => {
+const DemoVerificationPage: React.FC = () => {
   const [packageId, setPackageId] = useState('atlas-protocol/research-agent');
   const [commitSha, setCommitSha] = useState('sha256:d9b2e04f9812cc994017bca882e558a120092bf');
   const [targetNetwork, setTargetNetwork] = useState('61997');
@@ -117,7 +139,7 @@ export const VerificationPage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col w-full pb-16">
+    <div className="flex flex-col w-full pb-16" data-testid="demo-verification-page">
       {/* Editorial Header & Ticker */}
       <section className="relative w-full bg-brand-cream border-b-2 border-brand-charcoal py-12 px-6 lg:px-12 overflow-hidden">
         <div className="max-w-[1360px] mx-auto relative z-10">
@@ -132,6 +154,7 @@ export const VerificationPage: React.FC = () => {
               </span>
             </div>
             <div className="flex items-center gap-6 uppercase">
+              <DataModeBadge />
               <span className="flex items-center gap-2">
                 <span className="inline-block w-2.5 h-2.5 rounded-full bg-brand-orange animate-pulse"></span>
                 CONSENSUS LATENCY: <strong className="text-brand-charcoal font-bold">184MS</strong>

@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { getUpdateSealConfigResult, isLiveReadsEnabled } from '../../lib/updateSealConfig';
 import { UpdateSealError } from '../../lib/updateSealErrors';
+import type { VerifyLookupInput } from '../../lib/verifyRelease';
+import { verifyLiveRelease } from '../../lib/verifyRelease';
 import {
   getCandidate,
   getPackage,
@@ -68,6 +70,18 @@ export function useOnChainPackageByPublisherSlug(publisher: string | undefined, 
       return { packageUid, record };
     },
     enabled: liveEnabled && Boolean(publisher && packageSlug),
+    ...LIVE_QUERY_OPTIONS,
+  });
+}
+
+export function useLiveReleaseVerification(input: VerifyLookupInput | null) {
+  const configResult = getUpdateSealConfigResult();
+  const liveEnabled = isLiveReadsEnabled(configResult);
+  const lookupKey = input ? `${input.packageUid}@${input.version}` : '';
+  return useQuery({
+    queryKey: registryQueryKeys.verification(input?.mode ?? 'candidate', lookupKey),
+    queryFn: () => verifyLiveRelease(input as VerifyLookupInput),
+    enabled: liveEnabled && input !== null,
     ...LIVE_QUERY_OPTIONS,
   });
 }

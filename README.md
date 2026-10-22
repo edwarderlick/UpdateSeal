@@ -54,6 +54,10 @@ Set `VITE_UPDATESEAL_DATA_MODE` to `live` or `demo` (see `frontend/.env.example`
 
 Live registry cards link to `/packages/:publisher/:packageSlug`. The demo Atlas route `/packages/:packageId` is unchanged.
 
+### Public release verification
+
+`/verify` is a wallet-free Studio-dev lookup. Supported methods are candidate ID (`publisher/slug@version`) and package UID plus version. “Verified” means the on-chain record and its decision fields were read and validated; it does not mean every status is approved. Completed verdicts recompute the canonical decision hash in the browser and compare it with the stored `decision_hash`. Evidence bytes are hashed only when you click Verify Evidence Bytes. Studio-dev is a preview network and may reset.
+
 ---
 
 ## Repository Structure
@@ -135,7 +139,7 @@ D:\UpdateSeal
 | `/decisions/review-required` | Decision Report `0x02`: Review Required (Multi-Sig Governance) |
 | `/decisions/capability-violation` | Decision Report `0x03`: Hard Capability Violation (Blocked) |
 | `/decisions/evidence-unavailable` | Decision Report `0x04`: Evidence Unavailable (Fetch Failure) |
-| `/verify` | Public Release Verification Tool (CLI & JSON Output) |
+| `/verify` | Public live release verification (candidate ID or package UID + version; no wallet) |
 | `/dashboard` | Developer Package Dashboard with First-Use State Toggle |
 | `/activity` | Protocol Activity Feed & Transaction History |
 | `/how-it-works` | Technical Protocol Guide & Architectural Specification |
@@ -214,7 +218,7 @@ The active Studio-dev contract at `0xCdf0410A2883c27983d5C3062E40F88dfc83c5E3` e
 
 ## Next Planned Integration Phase
 
-1. **Dashboard, activity feed, and verification-tool live wiring** remain demo-backed.
-2. **`evaluate_candidate` is still not a frontend write.** The public decision report is read-only.
+1. **Dashboard and activity feed** remain demo-backed.
+2. **`evaluate_candidate` is still not a frontend write.** Public verification and decision reports are read-only.
 3. Live multi-validator review progress is not simulated from on-chain events; completed live candidates open the decision report.
 

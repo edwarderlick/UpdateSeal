@@ -70,6 +70,8 @@ The live package UID is `lowercase(publisher) + "/" + packageSlug`. Direct refre
 
 Candidate draft sessionStorage is namespaced by live package UID (`updateseal_candidate_form:live:{packageUid}`). Atlas demo drafts are stored separately and are never restored into a live package. In-flight transaction hashes are kept in memory for this tab session; a full browser refresh does not restore a pending hash.
 
+Public live verification is at `/verify`. Lookup a candidate ID (`publisher/slug@version`) or a package UID plus version. “Verified” means the on-chain record and its decision fields were read and validated; it does not mean every status is approved. Completed verdicts recompute the canonical decision hash in the browser. Evidence bytes are hashed only when you click Verify Evidence Bytes. Public verification does not open a wallet. Studio-dev is a preview network and may reset.
+
 Read methods: `package_count`, `package_uid_at`, `package_exists`, `get_package`, `get_package_uid`, `candidate_count`, `candidate_id_at`, `candidate_exists`, `get_candidate`, `get_candidate_id`.
 
 Write methods used by the frontend: `register_package`, `submit_candidate`. `evaluate_candidate` is not called.

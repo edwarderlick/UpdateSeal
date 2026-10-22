@@ -5,4 +5,6 @@ export const registryQueryKeys = {
   packageByPublisherSlug: (publisher: string, packageSlug: string) =>
     [...registryQueryKeys.all, 'package-by-publisher-slug', publisher.toLowerCase(), packageSlug] as const,
   candidate: (candidateId: string) => [...registryQueryKeys.all, 'candidate', candidateId] as const,
+  verification: (mode: 'candidate' | 'package', lookupKey: string) =>
+    [...registryQueryKeys.all, 'verification', mode, lookupKey] as const,
 };
