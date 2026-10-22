@@ -72,6 +72,8 @@ Candidate draft sessionStorage is namespaced by live package UID (`updateseal_ca
 
 Public live verification is at `/verify`. Lookup a candidate ID (`publisher/slug@version`) or a package UID plus version. “Verified” means the on-chain record and its decision fields were read and validated; it does not mean every status is approved. Completed verdicts recompute the canonical decision hash in the browser. Evidence bytes are hashed only when you click Verify Evidence Bytes. Public verification does not open a wallet. Studio-dev is a preview network and may reset.
 
+`/dashboard` is a wallet-aware read-only publisher scan of registry pages (20 records, max 4 concurrent reads). Connecting identifies the public address; no signature is requested for dashboard reads. `/activity` is a wallet-free current registry snapshot ordered by package and candidate indexes, not block time. The official package is `0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal`; `updateseal-v2-e2e` is a visible immutable legacy smoke record. Studio-dev is a preview network and may reset.
+
 Read methods: `package_count`, `package_uid_at`, `package_exists`, `get_package`, `get_package_uid`, `candidate_count`, `candidate_id_at`, `candidate_exists`, `get_candidate`, `get_candidate_id`.
 
 Write methods used by the frontend: `register_package`, `submit_candidate`. `evaluate_candidate` is not called.

@@ -1,13 +1,26 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { mockActivityEvents } from '../mocks';
-import { ActivityEvent } from '../types';
-import { CheckCircle2, ShieldAlert, AlertTriangle, ArrowRight, ExternalLink, Filter } from 'lucide-react';
-import { CopyButton } from '../components/ui/CopyButton';
+import { ArrowRight, ExternalLink, Filter } from 'lucide-react';
+import { DataModeBadge } from '../components/ui/DataModeBadge';
+import { ConfigErrorPanel } from '../components/registry/RegistryChrome';
+import { getUpdateSealConfigResult, isLiveReadsEnabled } from '../lib/updateSealConfig';
+import { LiveActivityPage } from './LiveActivityPage';
+
+export const ActivityFeedPage: React.FC = () => {
+  const configResult = getUpdateSealConfigResult();
+  if (!configResult.ok) {
+    return <ConfigErrorPanel testId="activity-config-error" message={configResult.error.userMessage} />;
+  }
+  if (isLiveReadsEnabled(configResult)) {
+    return <LiveActivityPage />;
+  }
+  return <DemoActivityFeedPage />;
+};
 
 type FilterType = 'all' | 'approval' | 'violation' | 'escalation' | 'registration';
 
-export const ActivityFeedPage: React.FC = () => {
+const DemoActivityFeedPage: React.FC = () => {
   const [filterType, setFilterType] = useState<FilterType>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -24,7 +37,7 @@ export const ActivityFeedPage: React.FC = () => {
   const paginatedEvents = filteredEvents.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
-    <div className="flex flex-col w-full pb-16">
+    <div className="flex flex-col w-full pb-16" data-testid="demo-activity-page">
       {/* Telemetry Masthead */}
       <section className="w-full bg-brand-forest border-b-2 border-brand-charcoal text-white px-4 lg:px-12 py-8">
         <div className="max-w-[1440px] mx-auto flex flex-col gap-6">
@@ -51,6 +64,7 @@ export const ActivityFeedPage: React.FC = () => {
               <div className="inline-flex self-start bg-brand-pastelYellow text-brand-charcoal border border-brand-charcoal px-3 py-1 font-mono text-xs font-bold uppercase -rotate-1 shadow-[2px_2px_0px_#0B130E]">
                 ✦ HIGH-DENSITY EVENT STREAM &amp; DEMO PROOFS
               </div>
+              <DataModeBadge />
               <h1 className="text-3xl lg:text-4xl font-black text-white tracking-tight uppercase leading-none font-sans">
                 PUBLIC ACTIVITY FEED <span className="text-brand-pastelYellow">&amp; VERDICT LEDGER</span>
               </h1>

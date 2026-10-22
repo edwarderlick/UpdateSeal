@@ -1,6 +1,12 @@
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { getUpdateSealConfigResult, isLiveReadsEnabled } from '../../lib/updateSealConfig';
 import { UpdateSealError } from '../../lib/updateSealErrors';
+import {
+  INITIAL_ENUMERATION_CURSOR,
+  loadCandidatePage,
+  loadPackagePage,
+  type EnumerationCursor,
+} from '../../lib/registryEnumeration';
 import type { VerifyLookupInput } from '../../lib/verifyRelease';
 import { verifyLiveRelease } from '../../lib/verifyRelease';
 import {
@@ -70,6 +76,50 @@ export function useOnChainPackageByPublisherSlug(publisher: string | undefined, 
       return { packageUid, record };
     },
     enabled: liveEnabled && Boolean(publisher && packageSlug),
+    ...LIVE_QUERY_OPTIONS,
+  });
+}
+
+function enumerationKeyArgs(recordType: 'packages' | 'candidates') {
+  const configResult = getUpdateSealConfigResult();
+  if (!configResult.ok) {
+    return {
+      dataMode: 'invalid',
+      chainId: 0,
+      contractAddress: '',
+      recordType,
+    };
+  }
+  return {
+    dataMode: configResult.config.dataMode,
+    chainId: configResult.config.chainId,
+    contractAddress: configResult.config.contractAddress,
+    recordType,
+  };
+}
+
+export function useLivePackagePages(enabled: boolean, epoch = 0) {
+  const configResult = getUpdateSealConfigResult();
+  const liveEnabled = isLiveReadsEnabled(configResult);
+  return useInfiniteQuery({
+    queryKey: [...registryQueryKeys.enumeration(enumerationKeyArgs('packages')), epoch],
+    queryFn: ({ pageParam }: { pageParam: EnumerationCursor }) => loadPackagePage(pageParam),
+    initialPageParam: INITIAL_ENUMERATION_CURSOR,
+    getNextPageParam: (lastPage) => (lastPage.countChanged ? undefined : lastPage.nextCursor),
+    enabled: liveEnabled && enabled,
+    ...LIVE_QUERY_OPTIONS,
+  });
+}
+
+export function useLiveCandidatePages(enabled: boolean, epoch = 0) {
+  const configResult = getUpdateSealConfigResult();
+  const liveEnabled = isLiveReadsEnabled(configResult);
+  return useInfiniteQuery({
+    queryKey: [...registryQueryKeys.enumeration(enumerationKeyArgs('candidates')), epoch],
+    queryFn: ({ pageParam }: { pageParam: EnumerationCursor }) => loadCandidatePage(pageParam),
+    initialPageParam: INITIAL_ENUMERATION_CURSOR,
+    getNextPageParam: (lastPage) => (lastPage.countChanged ? undefined : lastPage.nextCursor),
+    enabled: liveEnabled && enabled,
     ...LIVE_QUERY_OPTIONS,
   });
 }

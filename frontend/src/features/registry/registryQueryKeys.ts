@@ -7,4 +7,26 @@ export const registryQueryKeys = {
   candidate: (candidateId: string) => [...registryQueryKeys.all, 'candidate', candidateId] as const,
   verification: (mode: 'candidate' | 'package', lookupKey: string) =>
     [...registryQueryKeys.all, 'verification', mode, lookupKey] as const,
+  enumeration: (args: {
+    dataMode: string;
+    chainId: number;
+    contractAddress: string;
+    recordType: 'packages' | 'candidates';
+  }) =>
+    [
+      ...registryQueryKeys.all,
+      'enumeration',
+      args.dataMode,
+      args.chainId,
+      args.contractAddress,
+      args.recordType,
+    ] as const,
+  enumerationPage: (args: {
+    dataMode: string;
+    chainId: number;
+    contractAddress: string;
+    recordType: 'packages' | 'candidates';
+    page: number;
+    cursor: string;
+  }) => [...registryQueryKeys.enumeration(args), args.page, args.cursor] as const,
 };

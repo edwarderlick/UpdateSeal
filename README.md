@@ -58,6 +58,14 @@ Live registry cards link to `/packages/:publisher/:packageSlug`. The demo Atlas 
 
 `/verify` is a wallet-free Studio-dev lookup. Supported methods are candidate ID (`publisher/slug@version`) and package UID plus version. “Verified” means the on-chain record and its decision fields were read and validated; it does not mean every status is approved. Completed verdicts recompute the canonical decision hash in the browser and compare it with the stored `decision_hash`. Evidence bytes are hashed only when you click Verify Evidence Bytes. Studio-dev is a preview network and may reset.
 
+### Live dashboard and registry activity
+
+`/dashboard` scans paginated registry indexes (20 records per page, at most 4 concurrent reads) for packages whose publisher matches the connected wallet. Connecting a wallet selects that public address only; dashboard reads do not request a signature. The contract has no publisher index and no timestamps.
+
+`/activity` is a public current registry snapshot with separate package and candidate lists ordered by their own registry indexes. It is not an event log and does not invent transaction hashes or a unified chronology. Filters apply to loaded records.
+
+`0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal` is the official UpdateSeal package. `…/updateseal-v2-e2e` is an immutable legacy smoke record and remains visible. Studio-dev is a preview network and may reset.
+
 ---
 
 ## Repository Structure
@@ -140,8 +148,8 @@ D:\UpdateSeal
 | `/decisions/capability-violation` | Decision Report `0x03`: Hard Capability Violation (Blocked) |
 | `/decisions/evidence-unavailable` | Decision Report `0x04`: Evidence Unavailable (Fetch Failure) |
 | `/verify` | Public live release verification (candidate ID or package UID + version; no wallet) |
-| `/dashboard` | Developer Package Dashboard with First-Use State Toggle |
-| `/activity` | Protocol Activity Feed & Transaction History |
+| `/dashboard` | Live developer dashboard (wallet-aware publisher scan; read-only) or demo packages |
+| `/activity` | Live public registry activity snapshot (no wallet) or demo feed |
 | `/how-it-works` | Technical Protocol Guide & Architectural Specification |
 
 ---

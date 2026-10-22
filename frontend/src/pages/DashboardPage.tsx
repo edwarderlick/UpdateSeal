@@ -3,14 +3,29 @@ import { Link } from 'react-router-dom';
 import { useWallet } from '../features/wallet/useWallet';
 import { Plus, CheckCircle2, ArrowRight } from 'lucide-react';
 import { CopyButton } from '../components/ui/CopyButton';
+import { DataModeBadge } from '../components/ui/DataModeBadge';
+import { ConfigErrorPanel } from '../components/registry/RegistryChrome';
+import { getUpdateSealConfigResult, isLiveReadsEnabled } from '../lib/updateSealConfig';
+import { LiveDashboardPage } from './LiveDashboardPage';
 
 export const DashboardPage: React.FC = () => {
+  const configResult = getUpdateSealConfigResult();
+  if (!configResult.ok) {
+    return <ConfigErrorPanel testId="dashboard-config-error" message={configResult.error.userMessage} />;
+  }
+  if (isLiveReadsEnabled(configResult)) {
+    return <LiveDashboardPage />;
+  }
+  return <DemoDashboardPage />;
+};
+
+const DemoDashboardPage: React.FC = () => {
   const { walletState, openConnectModal, openNetworkModal } = useWallet();
   const [searchQuery, setSearchQuery] = useState('');
   const [showEmptyState, setShowEmptyState] = useState(false);
 
   return (
-    <div className="flex flex-col w-full pb-16">
+    <div className="flex flex-col w-full pb-16" data-testid="demo-dashboard-page">
       {/* Top Demo Toolbar: Toggle Empty State & Wallet Test Modals */}
       <aside className="w-full bg-brand-pastelYellow border-b-2 border-brand-charcoal py-2 px-4 lg:px-12 font-mono text-xs">
         <div className="max-w-[1440px] mx-auto flex flex-wrap items-center justify-between gap-3">
@@ -59,6 +74,9 @@ export const DashboardPage: React.FC = () => {
               </span>
             </div>
 
+            <div className="flex items-center gap-2">
+              <DataModeBadge />
+            </div>
             <h1 className="text-3xl lg:text-4xl font-black uppercase tracking-tight text-brand-charcoal font-sans">
               Developer Registry Dashboard
             </h1>
