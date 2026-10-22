@@ -35,14 +35,14 @@ export interface LiveRegistrationReceipt {
 const RECEIPT_STORAGE_KEY = 'updateseal_registration_receipt';
 
 const defaultFormData: RegistrationFormData = {
-  packageId: 'sentinel-code-auditor',
-  displayName: 'Sentinel Code Auditor',
-  name: 'Sentinel Code Auditor',
-  description: 'Autonomous static analysis daemon evaluating smart contracts against security invariants.',
-  repositoryUrl: 'https://github.com/sentinel-sec/code-auditor',
+  packageId: 'updateseal',
+  displayName: 'UpdateSeal',
+  name: 'UpdateSeal',
+  description: 'On-chain release approval registry for autonomous AI software.',
+  repositoryUrl: 'https://github.com/edwarderlick/UpdateSeal',
   ownerWallet: MOCK_OWNER_WALLET,
   baselineVersion: 'v1.0.0',
-  baselineCommitSha: '4f89a29e81bfa0021c38e9184b2910cbe8822910',
+  baselineCommitSha: 'b5d498fa08949e1e0f5113fb2f9d154368dfa97c',
   manifestPath: 'package.json',
   license: 'Apache-2.0',
   capabilityCharter: DEFAULT_ATLAS_CHARTER,
@@ -205,7 +205,7 @@ export const RegistrationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     const errors: Record<string, string> = {};
     const slug = formData.packageId.trim();
     if (!slug) {
-      errors.packageId = 'Package slug is required (e.g. sentinel-code-auditor).';
+      errors.packageId = 'Package slug is required (e.g. updateseal).';
     } else {
       const slugError = validatePackageSlug(slug);
       if (slugError) {

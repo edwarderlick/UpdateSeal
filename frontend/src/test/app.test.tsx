@@ -248,7 +248,7 @@ describe('UpdateSeal Comprehensive Test Suite', () => {
     };
 
     const { unmount } = renderWithProviders(<TestComponent />);
-    expect(screen.getByTestId('form-name').textContent).toBe('Sentinel Code Auditor');
+    expect(screen.getByTestId('form-name').textContent).toBe('UpdateSeal');
 
     fireEvent.click(screen.getByText('Change Name'));
     expect(screen.getByTestId('form-name').textContent).toBe('Custom Test Agent');
@@ -262,7 +262,7 @@ describe('UpdateSeal Comprehensive Test Suite', () => {
   // 5. Registration validation
   it('5. validates Step 1 fields and prevents invalid progression', () => {
     renderWithProviders(<RegisterStep1Page />);
-    const repoInput = screen.getByPlaceholderText(/https:\/\/github\.com\/sentinel-sec\/code-auditor/i);
+    const repoInput = screen.getByPlaceholderText(/https:\/\/github\.com\/edwarderlick\/UpdateSeal/i);
     fireEvent.change(repoInput, { target: { value: 'invalid-url' } });
 
     const submitBtn = screen.getByRole('button', { name: /Continue to Step 2/i });

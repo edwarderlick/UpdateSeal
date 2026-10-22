@@ -84,7 +84,7 @@ export const RegisterStep2Page: React.FC = () => {
                   type="text"
                   value={formData.baselineCommitSha}
                   onChange={(e) => updateFormData({ baselineCommitSha: e.target.value })}
-                  placeholder="4f89a29e81bfa0021c38e9184b2910cbe8822910"
+                  placeholder="b5d498fa08949e1e0f5113fb2f9d154368dfa97c"
                   className="w-full pl-9 pr-4 py-3 font-mono text-xs border-2 border-brand-charcoal focus:ring-0 focus:border-brand-orange bg-brand-cream text-brand-charcoal font-bold"
                 />
               </div>

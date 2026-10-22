@@ -7,6 +7,9 @@
 > - Deployment transaction: `0x8d8179e0ca8875a6cced3564575f98167e5b75245ec5a9c245fe4516016e9897`.
 > - The previous address `0x6A882db328782051dFf05C40F4C34b3F223cd80A` is legacy **Evidence Schema v1**. v1 and v2 evidence documents are incompatible. Do not send v2 candidates to the v1 address.
 > - Facts live in `deployments/studio-dev.json`. Studio-dev is a preview environment and may reset.
+> - Official project repository: `https://github.com/edwarderlick/UpdateSeal`.
+> - Active application package: `0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal` (baseline `b5d498fa08949e1e0f5113fb2f9d154368dfa97c`).
+> - The earlier smoke package `0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal-v2-e2e` incorrectly points at Provider-Court. It is immutable on-chain and must not be used for UpdateSeal candidates.
 > - `submit_candidate` and `evaluate_candidate` remain separate transactions. `evaluate_candidate` is still not wired into the frontend.
 > - No funds are custodied, and no escrow, bonds, or slashing mechanics exist in this contract.
 

@@ -47,7 +47,7 @@ export const RegisterStep3Page: React.FC = () => {
   const liveCharterJson = {
     charter_version: '1.4.0',
     contract_id: 'Contract integration pending',
-    package_id: formData.packageId || 'sentinel-code-auditor',
+    package_id: formData.packageId || 'updateseal',
     baseline_commit: formData.baselineCommitSha || '4f89a29e81bfa0021c',
     rules: {
       network_egress: {

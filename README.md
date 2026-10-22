@@ -17,6 +17,12 @@ UpdateSeal is a decentralized release approval registry for autonomous AI agents
 | Deployment transaction | `0x8d8179e0ca8875a6cced3564575f98167e5b75245ec5a9c245fe4516016e9897` |
 | Legacy v1 contract | `0x6A882db328782051dFf05C40F4C34b3F223cd80A` (Evidence Schema v1; do not send v2 candidates) |
 | Manifest | `deployments/studio-dev.json` |
+| Official GitHub repository | `https://github.com/edwarderlick/UpdateSeal` |
+| Active application package | `0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal` |
+| Published baseline commit | `b5d498fa08949e1e0f5113fb2f9d154368dfa97c` (`main`) |
+| Erroneous legacy smoke package | `0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal-v2-e2e` (immutable; points at Provider-Court; do not use for UpdateSeal candidates) |
+
+The official project repository is `https://github.com/edwarderlick/UpdateSeal`. Provider-Court is a separate GenLayer project. An earlier Studio-dev smoke registration (`updateseal-v2-e2e`) incorrectly used Provider-Court as its repository URL. That on-chain package cannot be edited or deleted and may still appear in public registry enumeration. Evidence Schema v2 candidates must use the `updateseal` package and the published UpdateSeal baseline.
 
 Studio-dev is a preview environment and may reset. Do not treat a Studio-dev address as durable mainnet state.
 
@@ -204,5 +210,5 @@ The active Studio-dev contract at `0xCdf0410A2883c27983d5C3062E40F88dfc83c5E3` e
 
 ## Next Planned Integration Phase
 
-1. **Controlled `submit_candidate`:** submit one Evidence Schema v2 candidate against the active v2 contract. `evaluate_candidate` remains a separate later transaction and is not wired in the frontend.
+1. **Controlled `submit_candidate`:** submit one Evidence Schema v2 candidate against the active v2 contract **and the correct `updateseal` package** (`0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal`, repository `https://github.com/edwarderlick/UpdateSeal`). Do not submit candidates against the erroneous `updateseal-v2-e2e` Provider-Court smoke package. `evaluate_candidate` remains a separate later transaction and is not wired in the frontend.
 

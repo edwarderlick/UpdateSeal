@@ -71,7 +71,7 @@ export const RegisterSuccessPage: React.FC = () => {
             </div>
             <div className="flex items-center justify-between">
               <span className="text-stone-500 uppercase">Package ID:</span>
-              <span className="font-bold text-brand-charcoal">{formData.packageId || 'sentinel-code-auditor'}</span>
+              <span className="font-bold text-brand-charcoal">{formData.packageId || 'updateseal'}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-stone-500 uppercase">Baseline Version:</span>

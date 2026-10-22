@@ -59,7 +59,7 @@ export const RegisterStep1Page: React.FC = () => {
                 type="text"
                 value={formData.packageId}
                 onChange={(e) => updateFormData({ packageId: e.target.value })}
-                placeholder="sentinel-code-auditor"
+                placeholder="updateseal"
                 className="w-full p-3 font-mono text-xs border-2 border-brand-charcoal focus:ring-0 focus:border-brand-orange bg-brand-cream text-brand-charcoal font-bold"
               />
               {errors.packageId && (
@@ -82,7 +82,7 @@ export const RegisterStep1Page: React.FC = () => {
                 type="text"
                 value={formData.displayName}
                 onChange={(e) => updateFormData({ displayName: e.target.value })}
-                placeholder="Sentinel Code Auditor"
+                placeholder="UpdateSeal"
                 className="w-full p-3 font-mono text-xs border-2 border-brand-charcoal focus:ring-0 focus:border-brand-orange bg-brand-cream text-brand-charcoal font-bold"
               />
               {errors.displayName && (
@@ -116,7 +116,7 @@ export const RegisterStep1Page: React.FC = () => {
                 type="text"
                 value={formData.repositoryUrl}
                 onChange={(e) => updateFormData({ repositoryUrl: e.target.value })}
-                placeholder="https://github.com/sentinel-sec/code-auditor"
+                placeholder="https://github.com/edwarderlick/UpdateSeal"
                 className="w-full p-3 font-mono text-xs border-2 border-brand-charcoal focus:ring-0 focus:border-brand-orange bg-brand-cream text-brand-charcoal font-bold"
               />
               {errors.repositoryUrl && (
