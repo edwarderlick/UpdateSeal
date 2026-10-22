@@ -4,9 +4,9 @@ UpdateSeal is a decentralized release approval registry for autonomous AI agents
 
 ---
 
-## Current Status: Live Public Reads; Writes Intentionally Unwired
+## Current Status: Live Public Reads and Wallet Writes
 
-`UpdateSealRegistry` is deployed on GenLayer Studio-dev. The frontend reads the public registry through GenLayerJS (`genlayer-js@2.0.0-rc.1`) when `VITE_UPDATESEAL_DATA_MODE=live`. Wallet connection (Reown/AppKit) remains available, but connecting a wallet does not submit transactions. This is not full frontend contract integration: `register_package`, `submit_candidate`, and `evaluate_candidate` are still unwired.
+`UpdateSealRegistry` is deployed on GenLayer Studio-dev. The frontend reads the public registry through GenLayerJS (`genlayer-js@2.0.0-rc.1`) when `VITE_UPDATESEAL_DATA_MODE=live`. Connected wallets can submit `register_package`, `submit_candidate`, and `evaluate_candidate` after fee estimation and explicit confirmation.
 
 | Item | Value |
 | :--- | :--- |
@@ -27,7 +27,7 @@ The official project repository is `https://github.com/edwarderlick/UpdateSeal`.
 
 Studio-dev is a preview environment and may reset. Do not treat a Studio-dev address as durable mainnet state.
 
-Write methods: `register_package`, `submit_candidate`, `evaluate_candidate`. Frontend pages do not submit these calls yet.
+Write methods used by the frontend: `register_package`, `submit_candidate`, `evaluate_candidate`.
 
 ### Public read architecture
 
@@ -222,11 +222,20 @@ Create `evidence-v2.json`, add it to the candidate tree, commit, then use that c
 
 The active Studio-dev contract at `0xCdf0410A2883c27983d5C3062E40F88dfc83c5E3` evaluates Evidence Schema v2. The previous address `0x6A882db328782051dFf05C40F4C34b3F223cd80A` is legacy Evidence Schema v1. v1 and v2 evidence documents are incompatible. Do not send v2 candidates to the v1 address.
 
-`submit_candidate` and `evaluate_candidate` remain separate transactions. `evaluate_candidate` is still not wired into the frontend.
+`submit_candidate` and `evaluate_candidate` remain separate transactions.
 
-## Next Planned Integration Phase
+### Live candidate evaluation
 
-1. **Dashboard and activity feed** remain demo-backed.
-2. **`evaluate_candidate` is still not a frontend write.** Public verification and decision reports are read-only.
-3. Live multi-validator review progress is not simulated from on-chain events; completed live candidates open the decision report.
+`evaluate_candidate(candidate_id)` is a frontend wallet write. Any connected Studio-dev wallet may request evaluation of a **PENDING** candidate; the caller pays the GenLayer evaluation fee and does not become the package owner. The contract (not the caller) produces the verdict.
+
+The UI estimates the exact `evaluate_candidate` fee, requires an explicit **Request Evaluation** click, re-reads the candidate immediately before `writeContract`, stores an immutable public transaction snapshot, classifies the GenLayer receipt with `isSuccessful`, and verifies the finalized `get_candidate` / `get_package` read-back including the canonical decision hash. **Check Existing Transaction** only waits on that hash and never submits again.
+
+Frontend duplicate protection (PENDING-only, freshness checks, one write per confirmation, local unresolved snapshot) reduces accidental double requests. It cannot eliminate races from another wallet or browser. The existing approved candidate `…/updateseal@0.1.0-v2-smoke` must not be evaluated again. Studio-dev is a preview network and may reset.
+
+## Remaining product areas
+
+1. Live multi-validator review progress is not simulated from on-chain events; completed live candidates open the decision report.
+2. GitHub repository ownership is still unproven.
+3. Studio-dev preview state may reset.
+4. A separate controlled smoke test of a real PENDING candidate evaluation is still required. The existing APPROVED candidate must not be re-evaluated.
 

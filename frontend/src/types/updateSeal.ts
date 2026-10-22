@@ -133,3 +133,77 @@ export interface SubmitCandidateProgress {
   estimatedFeeWei?: bigint;
   estimatedFeeLabel?: string;
 }
+
+export interface EvaluateCandidateParams {
+  candidateId: string;
+  senderAddress: `0x${string}`;
+}
+
+export interface PendingEvaluationSnapshot {
+  readonly transactionHash: `0x${string}`;
+  readonly candidateId: string;
+  readonly packageUid: string;
+  readonly version: string;
+  readonly candidateCommitSha: string;
+  readonly evidenceUri: string;
+  readonly evidenceHash: string;
+  readonly originalStatus: 'PENDING';
+  readonly originalEvaluationAttempts: number;
+  readonly callerAddress: `0x${string}`;
+  readonly chainId: number;
+  readonly contractAddress: `0x${string}`;
+  readonly feeEstimateWei: string;
+  readonly submittedAtLocal: string;
+  readonly submitter: string;
+}
+
+export interface EvaluationFeeEstimate {
+  readonly senderAddress: `0x${string}`;
+  readonly chainId: number;
+  readonly contractAddress: `0x${string}`;
+  readonly method: 'evaluate_candidate';
+  readonly candidateId: string;
+  readonly feeValue: bigint;
+  readonly feeLabel: string;
+  readonly distribution: unknown;
+  readonly messageAllocations: unknown;
+}
+
+export interface EvaluationConfirmation {
+  readonly candidateId: string;
+  readonly packageUid: string;
+  readonly version: string;
+  readonly candidateCommitSha: string;
+  readonly evidenceUri: string;
+  readonly evidenceHash: string;
+  readonly submitter: string;
+  readonly originalStatus: 'PENDING';
+  readonly originalEvaluationAttempts: number;
+  readonly callerAddress: `0x${string}`;
+  readonly chainId: number;
+  readonly contractAddress: `0x${string}`;
+  readonly estimate: EvaluationFeeEstimate;
+}
+
+export interface EvaluateCandidateSuccess {
+  transactionHash: `0x${string}`;
+  candidateId: string;
+  record: OnChainCandidateRecord;
+  packageRecord: OnChainPackageRecord;
+  consensusStatus: 'ACCEPTED' | 'FINALIZED';
+  status: 'APPROVED' | 'REVIEW_REQUIRED' | 'VIOLATION' | 'EVIDENCE_UNAVAILABLE';
+}
+
+export type EvaluateCandidateProgressPhase =
+  | 'estimating_fees'
+  | 'awaiting_wallet'
+  | 'submitted'
+  | 'waiting_consensus';
+
+export interface EvaluateCandidateProgress {
+  phase: EvaluateCandidateProgressPhase;
+  transactionHash?: `0x${string}`;
+  snapshot?: PendingEvaluationSnapshot;
+  estimatedFeeWei?: bigint;
+  estimatedFeeLabel?: string;
+}

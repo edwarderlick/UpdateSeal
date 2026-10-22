@@ -24,6 +24,7 @@ export const CONTRACT_METHODS = Object.freeze({
   getCandidateId: 'get_candidate_id',
   registerPackage: 'register_package',
   submitCandidate: 'submit_candidate',
+  evaluateCandidate: 'evaluate_candidate',
 });
 
 export async function mapWithConcurrency<T, R>(

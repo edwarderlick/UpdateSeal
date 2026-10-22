@@ -90,7 +90,7 @@ describe('updateSealContract', () => {
     expect(names).not.toContain('get_protocol_info');
     expect(names).not.toContain('evaluate_candidate');
     expect(CONTRACT_METHODS.submitCandidate).toBe('submit_candidate');
-    expect(Object.values(CONTRACT_METHODS)).not.toContain('evaluate_candidate');
+    expect(CONTRACT_METHODS.evaluateCandidate).toBe('evaluate_candidate');
     for (const call of readContract.mock.calls) {
       expect(call[0].address).toBe(CONTRACT);
     }

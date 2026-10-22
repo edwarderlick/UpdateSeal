@@ -9,6 +9,7 @@ import { inspectLiveDecision, isCompletedVerdictStatus } from '../lib/decisionRe
 import { liveCandidateDecisionPath, liveCandidateRecordPath, livePackagePath } from '../lib/registrationValidation';
 import { getUpdateSealConfigResult, isLiveReadsEnabled } from '../lib/updateSealConfig';
 import { logUpdateSealError, toUpdateSealError } from '../lib/updateSealErrors';
+import { EvaluateCandidatePanel } from '../components/candidate/EvaluateCandidatePanel';
 
 export const LiveCandidateReviewPage: React.FC = () => {
   const { publisher = '', packageSlug = '', version = '' } = useParams();
@@ -113,10 +114,10 @@ export const LiveCandidateReviewPage: React.FC = () => {
             <h1 className="text-3xl lg:text-5xl font-black uppercase tracking-tight">Evaluation Pending</h1>
             <p className="text-base max-w-3xl leading-relaxed">
               This live candidate has no completed verdict. The demo consensus tracker is not used for on-chain records.
-              Evaluation is a separate contract write and is not started from this page.
             </p>
             <p className="font-mono text-xs break-all">Candidate ID: {record.candidate_id}</p>
             <p className="font-mono text-xs">Evaluation attempts: {record.evaluation_attempts}</p>
+            <EvaluateCandidatePanel candidate={record} packageRecord={pkg} />
           </section>
         ) : (
           <div

@@ -8,6 +8,7 @@ import { inspectLiveDecision, isCompletedVerdictStatus, ON_CHAIN_INTEGRITY_ERROR
 import { getUpdateSealConfigResult, isLiveReadsEnabled } from '../lib/updateSealConfig';
 import { liveCandidateDecisionPath, liveCandidateReviewPath, livePackagePath } from '../lib/registrationValidation';
 import { logUpdateSealError, toUpdateSealError } from '../lib/updateSealErrors';
+import { EvaluateCandidatePanel } from '../components/candidate/EvaluateCandidatePanel';
 
 export const LiveCandidateDetailPage: React.FC = () => {
   const { publisher = '', packageSlug = '', version = '' } = useParams();
@@ -165,22 +166,28 @@ export const LiveCandidateDetailPage: React.FC = () => {
             )}
           </div>
           {completed ? (
-            <Link
-              to={decisionPath}
-              data-testid="view-decision-report"
-              className="inline-flex w-fit bg-brand-orange text-white px-5 py-3 text-xs font-bold uppercase border-2 border-brand-charcoal shadow-[4px_4px_0px_#0B130E] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-charcoal"
-            >
-              View Decision Report
-            </Link>
+            <div className="space-y-3" data-testid="evaluation-complete">
+              <p className="font-black uppercase">Evaluation complete</p>
+              <Link
+                to={decisionPath}
+                data-testid="view-decision-report"
+                className="inline-flex w-fit bg-brand-orange text-white px-5 py-3 text-xs font-bold uppercase border-2 border-brand-charcoal shadow-[4px_4px_0px_#0B130E] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-charcoal"
+              >
+                View Decision Report
+              </Link>
+            </div>
           ) : null}
           {record.status === 'PENDING' ? (
-            <Link
-              to={reviewPath}
-              data-testid="view-live-review"
-              className="inline-flex w-fit bg-white text-brand-charcoal px-5 py-3 text-xs font-bold uppercase border-2 border-brand-charcoal shadow-[4px_4px_0px_#0B130E] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange"
-            >
-              View evaluation progress
-            </Link>
+            <>
+              <EvaluateCandidatePanel candidate={record} packageRecord={pkg} />
+              <Link
+                to={reviewPath}
+                data-testid="view-live-review"
+                className="inline-flex w-fit bg-white text-brand-charcoal px-5 py-3 text-xs font-bold uppercase border-2 border-brand-charcoal shadow-[4px_4px_0px_#0B130E] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange"
+              >
+                View evaluation progress
+              </Link>
+            </>
           ) : null}
         </div>
       </section>

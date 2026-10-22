@@ -21,10 +21,22 @@ import {
   extractReturnedCandidateId,
   verifyReadBackCandidate,
 } from '../lib/candidateReceipt';
+import {
+  classifyEvaluationReceipt,
+  createPendingEvaluationSnapshot,
+  extractReturnedDecisionName,
+  verifyEvaluationReadBack,
+} from '../lib/evaluationReceipt';
 import type {
+  EvaluateCandidateParams,
+  EvaluateCandidateProgress,
+  EvaluateCandidateSuccess,
+  EvaluationConfirmation,
+  EvaluationFeeEstimate,
   OnChainCandidateRecord,
   OnChainPackageRecord,
   PendingCandidateSnapshot,
+  PendingEvaluationSnapshot,
   PendingRegistrationSnapshot,
   RegisterPackageParams,
   RegisterPackageSuccess,
@@ -547,5 +559,280 @@ export async function waitForExistingCandidate(
     });
   } catch (error) {
     throw toCandidateWriteError(error, transactionHash);
+  }
+}
+
+export interface EvaluateCandidateWriteDeps {
+  client: GenLayerWriteClient;
+  getCandidateFn?: typeof getCandidate;
+  getPackageFn?: typeof getPackage;
+  onProgress?: (event: EvaluateCandidateProgress) => void;
+  config?: UpdateSealConfig;
+  configResult?: UpdateSealConfigResult;
+  getConfigResult?: () => UpdateSealConfigResult;
+}
+
+function toEvaluateWriteError(error: unknown, transactionHash: string | null = null): UpdateSealError {
+  if (error instanceof UpdateSealError) {
+    if (transactionHash && !error.transactionHash) {
+      return new UpdateSealError(error.code, error.userMessage, transactionHash);
+    }
+    return error;
+  }
+  if (isWalletRejection(error)) {
+    return new UpdateSealError('USER_REJECTED', 'Wallet rejected the evaluation signature.', transactionHash);
+  }
+  if (isReceiptTimeout(error)) {
+    return new UpdateSealError(
+      'STATUS_UNKNOWN',
+      'Transaction status is unknown. The evaluation may still be processing. Keep this hash and check status.',
+      transactionHash,
+    );
+  }
+  const raw = error instanceof Error ? error.message : String(error);
+  const lower = raw.toLowerCase();
+  if (
+    lower.includes('fetch failed') ||
+    lower.includes('failed to fetch') ||
+    lower.includes('network') ||
+    lower.includes('econnreset') ||
+    lower.includes('etimedout')
+  ) {
+    if (transactionHash) {
+      return new UpdateSealError(
+        'STATUS_UNKNOWN',
+        'Transaction status is unknown. The evaluation may still be processing. Keep this hash and check status.',
+        transactionHash,
+      );
+    }
+    return new UpdateSealError(
+      'RPC_UNAVAILABLE',
+      'Studio-dev RPC was interrupted. The transaction may still be processing.',
+      transactionHash,
+    );
+  }
+  return new UpdateSealError(
+    'TRANSACTION_REJECTED',
+    sanitizeUserError(error, 'The contract rejected this evaluation.'),
+    transactionHash,
+  );
+}
+
+export async function estimateEvaluateCandidateFees(
+  params: EvaluateCandidateParams,
+  deps: EvaluateCandidateWriteDeps,
+): Promise<EvaluationFeeEstimate> {
+  const config = assertLiveWritesEnabled(deps);
+  const sender = params.senderAddress.toLowerCase() as `0x${string}`;
+  if (!/^0x[0-9a-f]{40}$/.test(sender)) {
+    throw new UpdateSealError('SENDER_MISMATCH', 'Transaction sender must match the connected wallet.');
+  }
+
+  const writeArgs = [params.candidateId];
+  deps.onProgress?.({ phase: 'estimating_fees' });
+
+  let estimate: unknown;
+  try {
+    estimate = await deps.client.estimateTransactionFeesForWrite({
+      account: sender,
+      address: config.contractAddress,
+      functionName: CONTRACT_METHODS.evaluateCandidate,
+      args: writeArgs,
+    });
+  } catch (error) {
+    if (error instanceof UpdateSealError) {
+      throw error;
+    }
+    throw new UpdateSealError('FEE_ESTIMATION_FAILED', FEE_ESTIMATION_FAILED_MESSAGE);
+  }
+
+  const validatedFees = requireValidWriteFees(estimate);
+  return {
+    senderAddress: sender,
+    chainId: config.chainId,
+    contractAddress: config.contractAddress,
+    method: 'evaluate_candidate',
+    candidateId: params.candidateId,
+    feeValue: validatedFees.feeValue,
+    feeLabel: formatGenFromWei(validatedFees.feeValue),
+    distribution: validatedFees.distribution,
+    messageAllocations: validatedFees.messageAllocations,
+  };
+}
+
+export async function confirmEvaluationFromReceipt(
+  snapshot: PendingEvaluationSnapshot,
+  receipt: unknown,
+  getCandidateFn: typeof getCandidate,
+  getPackageFn: typeof getPackage,
+): Promise<EvaluateCandidateSuccess> {
+  const classification = classifyEvaluationReceipt(receipt);
+
+  if (classification.kind === 'success') {
+    const decodedStatus = extractReturnedDecisionName(receipt);
+    let record: OnChainCandidateRecord;
+    let packageRecord: OnChainPackageRecord;
+    try {
+      record = await getCandidateFn(snapshot.candidateId);
+      packageRecord = await getPackageFn(snapshot.packageUid);
+    } catch {
+      throw new UpdateSealError(
+        'STATUS_UNKNOWN',
+        'Consensus finished but the candidate could not be confirmed on-chain yet. Keep this hash and check status.',
+        snapshot.transactionHash,
+      );
+    }
+
+    const verified = await verifyEvaluationReadBack({
+      snapshot,
+      candidate: record,
+      packageRecord,
+      decodedStatus,
+    });
+    if (!verified.ok) {
+      throw new UpdateSealError(
+        verified.code,
+        verified.message,
+        snapshot.transactionHash,
+      );
+    }
+
+    return {
+      transactionHash: snapshot.transactionHash,
+      candidateId: snapshot.candidateId,
+      record,
+      packageRecord,
+      consensusStatus: classification.consensusStatus ?? 'FINALIZED',
+      status: verified.status,
+    };
+  }
+
+  if (classification.kind === 'contract_rejected') {
+    throw new UpdateSealError(
+      'TRANSACTION_REJECTED',
+      sanitizeUserError(
+        classification.detail ?? leaderReceiptError(receipt) ?? 'The contract rejected this evaluation.',
+        'The contract rejected this evaluation.',
+      ),
+      snapshot.transactionHash,
+    );
+  }
+
+  throw new UpdateSealError(
+    'STATUS_UNKNOWN',
+    'Transaction status is unknown. The evaluation may still be processing. Keep this hash and check status.',
+    snapshot.transactionHash,
+  );
+}
+
+export async function evaluateCandidate(
+  params: {
+    confirmation: EvaluationConfirmation;
+  },
+  deps: EvaluateCandidateWriteDeps,
+): Promise<EvaluateCandidateSuccess> {
+  const config = assertLiveWritesEnabled(deps);
+  const confirmation = params.confirmation;
+  const sender = confirmation.callerAddress.toLowerCase() as `0x${string}`;
+  if (!/^0x[0-9a-f]{40}$/.test(sender)) {
+    throw new UpdateSealError('SENDER_MISMATCH', 'Transaction sender must match the connected wallet.');
+  }
+  if (confirmation.estimate.method !== CONTRACT_METHODS.evaluateCandidate) {
+    throw new UpdateSealError('STALE_CONFIRMATION', 'Fee estimate does not belong to evaluate_candidate.');
+  }
+  if (confirmation.estimate.senderAddress.toLowerCase() !== sender) {
+    throw new UpdateSealError('STALE_CONFIRMATION', 'Fee estimate sender no longer matches the connected wallet.');
+  }
+  if (confirmation.estimate.chainId !== config.chainId || confirmation.chainId !== config.chainId) {
+    throw new UpdateSealError('STALE_CONFIRMATION', 'Fee estimate chain no longer matches Studio-dev.');
+  }
+  if (
+    confirmation.estimate.contractAddress.toLowerCase() !== config.contractAddress.toLowerCase() ||
+    confirmation.contractAddress.toLowerCase() !== config.contractAddress.toLowerCase()
+  ) {
+    throw new UpdateSealError('STALE_CONFIRMATION', 'Fee estimate contract no longer matches the configured address.');
+  }
+  if (confirmation.estimate.candidateId !== confirmation.candidateId) {
+    throw new UpdateSealError('STALE_CONFIRMATION', 'Fee estimate candidate ID no longer matches.');
+  }
+
+  const fees = toWriteContractFees({
+    distribution: confirmation.estimate.distribution as never,
+    messageAllocations: confirmation.estimate.messageAllocations as never,
+    feeValue: confirmation.estimate.feeValue,
+  });
+
+  deps.onProgress?.({
+    phase: 'awaiting_wallet',
+    estimatedFeeWei: confirmation.estimate.feeValue,
+    estimatedFeeLabel: confirmation.estimate.feeLabel,
+  });
+
+  let rawHash: unknown;
+  try {
+    rawHash = await deps.client.writeContract({
+      account: sender,
+      address: config.contractAddress,
+      functionName: CONTRACT_METHODS.evaluateCandidate,
+      args: [confirmation.candidateId],
+      fees,
+    });
+  } catch (error) {
+    throw toEvaluateWriteError(error);
+  }
+
+  const transactionHash = normalizeTransactionHash(rawHash);
+  const snapshot = createPendingEvaluationSnapshot({
+    transactionHash,
+    candidateId: confirmation.candidateId,
+    packageUid: confirmation.packageUid,
+    version: confirmation.version,
+    candidateCommitSha: confirmation.candidateCommitSha,
+    evidenceUri: confirmation.evidenceUri,
+    evidenceHash: confirmation.evidenceHash,
+    originalEvaluationAttempts: confirmation.originalEvaluationAttempts,
+    callerAddress: sender,
+    chainId: confirmation.chainId,
+    contractAddress: confirmation.contractAddress,
+    feeEstimateWei: confirmation.estimate.feeValue,
+    submitter: confirmation.submitter,
+  });
+
+  deps.onProgress?.({ phase: 'submitted', transactionHash, snapshot });
+  deps.onProgress?.({ phase: 'waiting_consensus', transactionHash, snapshot });
+
+  const getCandidateFn = deps.getCandidateFn ?? getCandidate;
+  const getPackageFn = deps.getPackageFn ?? getPackage;
+
+  let receipt: unknown;
+  try {
+    receipt = await deps.client.waitForTransactionReceipt({
+      hash: transactionHash,
+      waitUntil: 'finalized',
+      interval: REGISTER_WAIT_INTERVAL_MS,
+      retries: REGISTER_WAIT_RETRIES,
+      fullTransaction: true,
+    });
+  } catch (error) {
+    throw toEvaluateWriteError(error, transactionHash);
+  }
+
+  return confirmEvaluationFromReceipt(snapshot, receipt, getCandidateFn, getPackageFn);
+}
+
+export async function waitForExistingEvaluation(
+  transactionHash: `0x${string}`,
+  deps: { client: Pick<GenLayerWriteClient, 'waitForTransactionReceipt'> },
+): Promise<unknown> {
+  try {
+    return await deps.client.waitForTransactionReceipt({
+      hash: transactionHash,
+      waitUntil: 'finalized',
+      interval: REGISTER_WAIT_INTERVAL_MS,
+      retries: REGISTER_WAIT_RETRIES,
+      fullTransaction: true,
+    });
+  } catch (error) {
+    throw toEvaluateWriteError(error, transactionHash);
   }
 }

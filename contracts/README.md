@@ -11,7 +11,7 @@
 > - Active application package: `0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal` (baseline `b5d498fa08949e1e0f5113fb2f9d154368dfa97c`).
 > - The earlier smoke package `0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal-v2-e2e` incorrectly points at Provider-Court. It is immutable on-chain and must not be used for UpdateSeal candidates.
 > - Controlled candidate `0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal@0.1.0-v2-smoke` is on-chain **APPROVED** after one `evaluate_candidate` transaction.
-> - `submit_candidate` and `evaluate_candidate` remain separate transactions. `evaluate_candidate` is still not wired into the frontend.
+> - `submit_candidate` and `evaluate_candidate` remain separate transactions. `evaluate_candidate` is a frontend wallet write for **PENDING** candidates only. The existing APPROVED smoke candidate must not be evaluated again.
 > - No funds are custodied, and no escrow, bonds, or slashing mechanics exist in this contract.
 
 Wallet registration proves which address registered the package. It does not prove ownership of the referenced GitHub repository. Repository ownership verification remains deferred.

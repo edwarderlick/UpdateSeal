@@ -159,10 +159,9 @@ describe('submitCandidate writes', () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
-  it('never calls evaluate_candidate and CONTRACT_METHODS has no evaluate method', () => {
+  it('never calls evaluate_candidate from submitCandidate', () => {
     expect(CONTRACT_METHODS.submitCandidate).toBe('submit_candidate');
-    expect('evaluateCandidate' in CONTRACT_METHODS).toBe(false);
-    expect(Object.values(CONTRACT_METHODS)).not.toContain('evaluate_candidate');
+    expect(CONTRACT_METHODS.evaluateCandidate).toBe('evaluate_candidate');
   });
 
   it('rejects zero fees with zero writes', async () => {
