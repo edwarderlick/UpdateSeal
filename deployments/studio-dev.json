@@ -48,7 +48,8 @@
     "contractUrl": "https://explorer-studio-dev.genlayer.com/address/0xCdf0410A2883c27983d5C3062E40F88dfc83c5E3",
     "smokeTestTransactionUrl": "https://explorer-studio-dev.genlayer.com/tx/0x23686eed1d58c899d0da855ef044b3b2e9730c23530e6832d8e87ce600a9a312",
     "applicationPackageTransactionUrl": "https://explorer-studio-dev.genlayer.com/tx/0x2218c81a9a3e3f1e1dfb02234121611f808512c254e9bcf47a895628cea07ae0",
-    "candidateSmokeTestTransactionUrl": "https://explorer-studio-dev.genlayer.com/tx/0x5545e2fbb76c8265b20b4fa03819ed1eeeb81f709171fd2cd860c4435e01a416"
+    "candidateSmokeTestTransactionUrl": "https://explorer-studio-dev.genlayer.com/tx/0x5545e2fbb76c8265b20b4fa03819ed1eeeb81f709171fd2cd860c4435e01a416",
+    "candidateEvaluationTransactionUrl": "https://explorer-studio-dev.genlayer.com/tx/0x0f911b652d9b66451ddafdb0aaf733acdb81542b4125376721d87c1f470cb408"
   },
   "officialRepositoryUrl": "https://github.com/edwarderlick/UpdateSeal",
   "applicationPackage": {
@@ -68,7 +69,7 @@
     "candidateCount": 1,
     "readBackVerified": true,
     "candidateSubmitted": true,
-    "evaluateCandidateCalled": false,
+    "evaluateCandidateCalled": true,
     "note": "Active UpdateSeal application package. Evidence Schema v2 candidates must use this package UID and the published UpdateSeal baseline. Do not use the erroneous legacy smoke package."
   },
   "candidateSmokeTest": {
@@ -80,18 +81,28 @@
     "evidenceUri": "https://raw.githubusercontent.com/edwarderlick/UpdateSeal/d097c0e6ce20fdedd3bc86ab5d2e832e5d29d54f/evidence/evidence-v2.json",
     "evidenceHash": "e0abffcfc03bcc53fb1a51094de1db934be9460a86d058e745efcb7180ff29ba",
     "evidenceByteCount": 1113,
-    "registrationTransactionId": "0x5545e2fbb76c8265b20b4fa03819ed1eeeb81f709171fd2cd860c4435e01a416",
+    "candidateTransactionId": "0x5545e2fbb76c8265b20b4fa03819ed1eeeb81f709171fd2cd860c4435e01a416",
     "transactionHash": "0x5545e2fbb76c8265b20b4fa03819ed1eeeb81f709171fd2cd860c4435e01a416",
     "consensusStatus": "FINALIZED",
     "executionResult": "FINISHED_WITH_RETURN",
     "finalized": true,
-    "status": "PENDING",
-    "decisionCode": 0,
-    "evaluationAttempts": 0,
+    "status": "APPROVED",
+    "decisionCode": 1,
+    "decisionSummary": "No charter violations were found",
+    "evaluationAttempts": 1,
+    "findingCodes": ["NO_VIOLATION"],
+    "decisionHash": "c69ca06aa7f3b679600751df1fb7f6f11f1bcf1ec4e69e7173e5e45fffa80f97",
     "readBackVerified": true,
-    "evaluateCandidateCalled": false,
+    "evaluateCandidateCalled": true,
     "submittedAtUtc": "2026-10-22T08:19:29Z",
-    "note": "Controlled Evidence Schema v2 candidate against the correct UpdateSeal package. Status is PENDING. Evaluation has not started."
+    "evaluationTransactionId": "0x0f911b652d9b66451ddafdb0aaf733acdb81542b4125376721d87c1f470cb408",
+    "evaluationConsensusStatus": "FINALIZED",
+    "evaluationExecutionResult": "FINISHED_WITH_RETURN",
+    "evaluationFinalized": true,
+    "evaluatedAtUtc": "2026-10-22T09:21:58Z",
+    "decisionHashVerified": true,
+    "evidenceRecheckedAfterEvaluation": true,
+    "note": "Controlled Evidence Schema v2 candidate against the correct UpdateSeal package. On-chain status is APPROVED after one evaluate_candidate transaction. evaluate_candidate remains unwired in the frontend."
   },
   "erroneousLegacySmokePackage": {
     "annotation": "erroneousLegacySmokePackage",
@@ -141,5 +152,5 @@
     },
     "note": "Legacy Evidence Schema v1 deployment. Do not send Evidence Schema v2 candidates to this address. v1 and v2 evidence documents are incompatible."
   },
-  "note": "Active deployment evaluates Evidence Schema v2 at the unchanged contract address. Official project repository is https://github.com/edwarderlick/UpdateSeal. The correct application package is 0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal. The earlier updateseal-v2-e2e package remains on-chain as erroneousLegacySmokePackage and was not deleted. Legacy v1 lives under previousDeployment. Studio-dev is a preview environment and may reset. Do not resubmit a transaction solely because receipt polling timed out; resume tracking the saved transaction ID. Candidate submission and evaluation remain separate transactions. evaluate_candidate is not wired into the frontend."
+  "note": "Active deployment evaluates Evidence Schema v2 at the unchanged contract address. Official project repository is https://github.com/edwarderlick/UpdateSeal. The correct application package is 0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal. The controlled candidate 0.1.0-v2-smoke is on-chain APPROVED. The earlier updateseal-v2-e2e package remains on-chain as erroneousLegacySmokePackage and was not deleted. Legacy v1 lives under previousDeployment. Studio-dev is a preview environment and may reset. Do not resubmit a transaction solely because receipt polling timed out; resume tracking the saved transaction ID. Candidate submission and evaluation remain separate transactions. evaluate_candidate is not wired into the frontend."
 }

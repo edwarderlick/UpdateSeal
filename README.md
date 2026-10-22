@@ -21,7 +21,7 @@ UpdateSeal is a decentralized release approval registry for autonomous AI agents
 | Active application package | `0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal` |
 | Published baseline commit | `b5d498fa08949e1e0f5113fb2f9d154368dfa97c` (`main`) |
 | Erroneous legacy smoke package | `0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal-v2-e2e` (immutable; points at Provider-Court; do not use for UpdateSeal candidates) |
-| Controlled v2 candidate | `0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal@0.1.0-v2-smoke` — **PENDING**, not evaluated |
+| Controlled v2 candidate | `0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal@0.1.0-v2-smoke` — **APPROVED** |
 
 The official project repository is `https://github.com/edwarderlick/UpdateSeal`. Provider-Court is a separate GenLayer project. An earlier Studio-dev smoke registration (`updateseal-v2-e2e`) incorrectly used Provider-Court as its repository URL. That on-chain package cannot be edited or deleted and may still appear in public registry enumeration. Evidence Schema v2 candidates must use the `updateseal` package and the published UpdateSeal baseline.
 
@@ -211,5 +211,5 @@ The active Studio-dev contract at `0xCdf0410A2883c27983d5C3062E40F88dfc83c5E3` e
 
 ## Next Planned Integration Phase
 
-1. **Controlled `evaluate_candidate`:** one Evidence Schema v2 candidate is already on-chain in **PENDING** state (`0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal@0.1.0-v2-smoke`). Evaluation is a separate later transaction and is not started. Do not submit candidates against the erroneous `updateseal-v2-e2e` Provider-Court smoke package.
+1. **Frontend decision-report wiring:** the controlled Evidence Schema v2 candidate `0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal@0.1.0-v2-smoke` is on-chain **APPROVED**. The live candidate page already shows status, decision code, summary, and evaluation attempts. Finding codes and `decision_hash` are not rendered yet. `evaluate_candidate` remains unwired in the frontend.
 
