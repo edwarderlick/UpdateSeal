@@ -30,7 +30,7 @@ Wallet connection also needs `VITE_REOWN_PROJECT_ID` for Reown AppKit. Never put
 
 Active contract: `0xCdf0410A2883c27983d5C3062E40F88dfc83c5E3` on Studio-dev (chain 61997), Evidence Schema v2. Legacy v1 address `0x6A882db328782051dFf05C40F4C34b3F223cd80A` remains in migration history. v1 and v2 evidence documents are incompatible. Studio-dev is a preview network and may reset.
 
-Official project repository: `https://github.com/edwarderlick/UpdateSeal`. The intended live application package is `updateseal` (`0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal`), baseline `b5d498fa08949e1e0f5113fb2f9d154368dfa97c`. The public registry enumerates every on-chain package, including the immutable erroneous smoke package `updateseal-v2-e2e` that incorrectly points at Provider-Court. Do not treat that smoke package as the UpdateSeal application package.
+Official project repository: `https://github.com/edwarderlick/UpdateSeal`. The intended live application package is `updateseal` (`0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal`), baseline `b5d498fa08949e1e0f5113fb2f9d154368dfa97c`. A controlled Evidence Schema v2 candidate `0.1.0-v2-smoke` is on-chain in **PENDING** state and has not been evaluated. The public registry enumerates every on-chain package, including the immutable erroneous smoke package `updateseal-v2-e2e` that incorrectly points at Provider-Court. Do not treat that smoke package as the UpdateSeal application package.
 
 ### How live registration works
 

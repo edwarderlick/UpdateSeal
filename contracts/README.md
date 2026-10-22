@@ -10,6 +10,7 @@
 > - Official project repository: `https://github.com/edwarderlick/UpdateSeal`.
 > - Active application package: `0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal` (baseline `b5d498fa08949e1e0f5113fb2f9d154368dfa97c`).
 > - The earlier smoke package `0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal-v2-e2e` incorrectly points at Provider-Court. It is immutable on-chain and must not be used for UpdateSeal candidates.
+> - Controlled candidate `0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal@0.1.0-v2-smoke` is on-chain in PENDING state. It has not been evaluated.
 > - `submit_candidate` and `evaluate_candidate` remain separate transactions. `evaluate_candidate` is still not wired into the frontend.
 > - No funds are custodied, and no escrow, bonds, or slashing mechanics exist in this contract.
 
