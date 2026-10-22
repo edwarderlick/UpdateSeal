@@ -118,6 +118,9 @@ D:\UpdateSeal
 | `/` | Editorial Overview & Protocol Landing Page |
 | `/registry` | Public Package Registry (live Studio-dev snapshot or demo mocks) |
 | `/packages/:publisher/:packageSlug` | Live on-chain package detail (publisher-scoped) |
+| `/packages/:publisher/:packageSlug/candidates/:version` | Live on-chain candidate record |
+| `/packages/:publisher/:packageSlug/candidates/:version/decision` | Live public decision report (status-selected verdict) |
+| `/packages/:publisher/:packageSlug/candidates/:version/review` | Live pending evaluation, or redirect to the decision report |
 | `/packages/atlas-research-agent` | Atlas Research Agent Dossier, Charter Matrix, and History |
 | `/register/identity` | Register Package Wizard — Step 1: Package Identity & Repository |
 | `/register/baseline` | Register Package Wizard — Step 2: Approved Baseline & Commit SHA |
@@ -211,5 +214,7 @@ The active Studio-dev contract at `0xCdf0410A2883c27983d5C3062E40F88dfc83c5E3` e
 
 ## Next Planned Integration Phase
 
-1. **Frontend decision-report wiring:** the controlled Evidence Schema v2 candidate `0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal@0.1.0-v2-smoke` is on-chain **APPROVED**. The live candidate page already shows status, decision code, summary, and evaluation attempts. Finding codes and `decision_hash` are not rendered yet. `evaluate_candidate` remains unwired in the frontend.
+1. **Dashboard, activity feed, and verification-tool live wiring** remain demo-backed.
+2. **`evaluate_candidate` is still not a frontend write.** The public decision report is read-only.
+3. Live multi-validator review progress is not simulated from on-chain events; completed live candidates open the decision report.
 

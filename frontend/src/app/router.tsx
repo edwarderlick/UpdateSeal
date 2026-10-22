@@ -18,6 +18,8 @@ import { LiveCandidateStep1Page } from '../pages/LiveCandidateStep1Page';
 import { LiveCandidateStep2Page } from '../pages/LiveCandidateStep2Page';
 import { LiveCandidateStep3Page } from '../pages/LiveCandidateStep3Page';
 import { LiveCandidateDetailPage } from '../pages/LiveCandidateDetailPage';
+import { LiveCandidateDecisionPage } from '../pages/LiveCandidateDecisionPage';
+import { LiveCandidateReviewPage } from '../pages/LiveCandidateReviewPage';
 import { ReviewTrackerPage } from '../pages/ReviewTrackerPage';
 import { DecisionApprovedPage } from '../pages/DecisionApprovedPage';
 import { DecisionReviewRequiredPage } from '../pages/DecisionReviewRequiredPage';
@@ -63,6 +65,14 @@ export const router = createBrowserRouter([
             element: <LiveCandidateStep3Page />
           }
         ]
+      },
+      {
+        path: 'packages/:publisher/:packageSlug/candidates/:version/decision',
+        element: <LiveCandidateDecisionPage />
+      },
+      {
+        path: 'packages/:publisher/:packageSlug/candidates/:version/review',
+        element: <LiveCandidateReviewPage />
       },
       {
         path: 'packages/:publisher/:packageSlug/candidates/:version',

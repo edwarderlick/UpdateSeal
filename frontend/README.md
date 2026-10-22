@@ -30,7 +30,7 @@ Wallet connection also needs `VITE_REOWN_PROJECT_ID` for Reown AppKit. Never put
 
 Active contract: `0xCdf0410A2883c27983d5C3062E40F88dfc83c5E3` on Studio-dev (chain 61997), Evidence Schema v2. Legacy v1 address `0x6A882db328782051dFf05C40F4C34b3F223cd80A` remains in migration history. v1 and v2 evidence documents are incompatible. Studio-dev is a preview network and may reset.
 
-Official project repository: `https://github.com/edwarderlick/UpdateSeal`. The intended live application package is `updateseal` (`0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal`), baseline `b5d498fa08949e1e0f5113fb2f9d154368dfa97c`. A controlled Evidence Schema v2 candidate `0.1.0-v2-smoke` is on-chain **APPROVED**. The live candidate page shows status, decision code, summary, and evaluation attempts. Finding codes and `decision_hash` are not rendered yet. `evaluate_candidate` remains unwired in this frontend. The public registry enumerates every on-chain package, including the immutable erroneous smoke package `updateseal-v2-e2e` that incorrectly points at Provider-Court. Do not treat that smoke package as the UpdateSeal application package.
+Official project repository: `https://github.com/edwarderlick/UpdateSeal`. The intended live application package is `updateseal` (`0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal`), baseline `b5d498fa08949e1e0f5113fb2f9d154368dfa97c`. A controlled Evidence Schema v2 candidate `0.1.0-v2-smoke` is on-chain **APPROVED**. The public live decision report is at `/packages/:publisher/:packageSlug/candidates/:version/decision`. Presentation is selected from the on-chain `status` string only (`APPROVED`, `REVIEW_REQUIRED`, `VIOLATION`, `EVIDENCE_UNAVAILABLE`, or a dedicated `PENDING` state). `finding_codes_json` must parse as a JSON array of non-empty strings; completed verdicts require a 64-character lowercase hex `decision_hash`. Malformed values show an on-chain data integrity error. `evaluate_candidate` remains unwired in this frontend. The public registry enumerates every on-chain package, including the immutable erroneous smoke package `updateseal-v2-e2e` that incorrectly points at Provider-Court. Do not treat that smoke package as the UpdateSeal application package.
 
 ### How live registration works
 
@@ -51,6 +51,8 @@ Live candidate wizard routes:
 - `/packages/:publisher/:packageSlug/releases/new/evidence`
 - `/packages/:publisher/:packageSlug/releases/new/confirm`
 - Candidate record: `/packages/:publisher/:packageSlug/candidates/:version`
+- Live decision report: `/packages/:publisher/:packageSlug/candidates/:version/decision`
+- Live review (pending, or redirect to the decision report): `/packages/:publisher/:packageSlug/candidates/:version/review`
 
 The live package UID is `lowercase(publisher) + "/" + packageSlug`. Direct refresh on every live wizard step reloads the on-chain package. Demo Atlas flow remains at `/packages/:packageId/releases/new/*` and is labeled `DEMO DATA`.
 
@@ -63,7 +65,7 @@ The live package UID is `lowercase(publisher) + "/" + packageSlug`. Direct refre
    UpdateSeal does not upload, commit, or push the repository. The URL commit segment is the candidate binding.
 4. The frontend fetches those raw bytes (HTTP 200, max 100,000 bytes), computes SHA-256 over the exact fetched bytes, and compares that digest to the entered hash. It does not hash a reserialized JSON object. Evidence Schema v1 is rejected with a migration message.
 5. `submit_candidate(package_uid, version, candidate_commit_sha, evidence_uri, evidence_hash)` is submitted with fee estimation first. The candidate ID is `package_uid + "@" + version`. The candidate record still stores `candidate_commit_sha`.
-6. After a successful receipt the candidate is **PENDING**. Evaluation is a separate `evaluate_candidate` transaction and is not wired in this frontend. The controlled smoke candidate `0.1.0-v2-smoke` is already on-chain **APPROVED**.
+6. After a successful receipt the candidate is **PENDING**. Evaluation is a separate `evaluate_candidate` transaction and is not a frontend write. The public decision report reads the stored verdict. The controlled smoke candidate `0.1.0-v2-smoke` is already on-chain **APPROVED**.
 7. Studio-dev is a preview network and may reset. The active contract at `0xCdf0410A2883c27983d5C3062E40F88dfc83c5E3` evaluates Evidence Schema v2. The previous address `0x6A882db328782051dFf05C40F4C34b3F223cd80A` is legacy Evidence Schema v1. v1 and v2 evidence documents are incompatible. Candidate submission and evaluation remain separate transactions. `evaluate_candidate` is still not wired in this frontend.
 
 Candidate draft sessionStorage is namespaced by live package UID (`updateseal_candidate_form:live:{packageUid}`). Atlas demo drafts are stored separately and are never restored into a live package. In-flight transaction hashes are kept in memory for this tab session; a full browser refresh does not restore a pending hash.

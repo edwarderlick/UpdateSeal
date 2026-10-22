@@ -245,3 +245,19 @@ export function liveCandidateRecordPath(
 ): string {
   return `${livePackagePath(publisherAddress, packageSlug)}/candidates/${encodeURIComponent(version)}`;
 }
+
+export function liveCandidateDecisionPath(
+  publisherAddress: string,
+  packageSlug: string,
+  version: string,
+): string {
+  return `${liveCandidateRecordPath(publisherAddress, packageSlug, version)}/decision`;
+}
+
+export function liveCandidateReviewPath(
+  publisherAddress: string,
+  packageSlug: string,
+  version: string,
+): string {
+  return `${liveCandidateRecordPath(publisherAddress, packageSlug, version)}/review`;
+}

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   derivePackageUid,
+  liveCandidateDecisionPath,
   livePackagePath,
   validateCommitSha,
   validateGithubRepositoryUrl,
@@ -50,6 +51,18 @@ describe('registration validation', () => {
     );
     expect(livePackagePath('0x1E47D7D7079FE4AD599B184559FFCDC56278FB54', 'updateseal-smoke')).toBe(
       '/packages/0x1e47d7d7079fe4ad599b184559ffcdc56278fb54/updateseal-smoke',
+    );
+  });
+
+  it('builds live candidate decision and review paths', () => {
+    expect(
+      liveCandidateDecisionPath(
+        '0xb3f7518df619ef485f7a1568ed3705bb6f5b0407',
+        'updateseal',
+        '0.1.0-v2-smoke',
+      ),
+    ).toBe(
+      '/packages/0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal/candidates/0.1.0-v2-smoke/decision',
     );
   });
 });
