@@ -1,0 +1,72 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+.pnp
+.pnp.js
+
+# Build and Production outputs
+dist/
+frontend/dist/
+build/
+out/
+
+# Testing & Coverage
+coverage/
+test-results/
+*.lcov
+artifacts/
+.pytest_cache/
+
+# Environment files and local secrets
+.env
+.env.*
+!.env.example
+frontend/.env.local
+studio-dev-burner.env
+*.burner.env
+
+# Cache and temporary files
+.cache/
+.vite/
+.temp/
+.tmp/
+*.tmp
+*.log
+
+# Editor and IDE
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Verification & Test Artifacts
+verification-screenshots/
+*.png
+!frontend/src/assets/**
+!docs/**
+
+# Backups and archives
+*-stitch-source-backup.zip
+*.zip
+*.tar.gz
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Wallets, keys, and generated keystores
+*.pem
+*.key
+*.keystore
+*.wallet
+**/keystores/
+
+

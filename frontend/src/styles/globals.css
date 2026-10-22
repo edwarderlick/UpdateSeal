@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    border-radius: 0 !important;
+  }
+  body {
+    background-color: #F4F1EA;
+    color: #0B130E;
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+.font-serif-italic {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-style: italic;
+}
+
+.font-mono-code {
+  font-family: 'JetBrains Mono', 'Space Mono', monospace;
+}
+
+/* Crisp 0px radius styling for brutalist editorial layout */
+.border-hard {
+  border: 1px solid #18241D;
+}
+
+.border-hard-thick {
+  border: 2px solid #18241D;
+}
+
+.border-b-hard {
+  border-bottom: 1px solid #18241D;
+}
+
+.border-r-hard {
+  border-right: 1px solid #18241D;
+}
+
+/* Angled high-contrast editorial badges */
+.sticker-badge {
+  display: inline-block;
+  padding: 2px 7px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  box-shadow: 2px 2px 0px #0B130E;
+}
+
+/* Stepped grid geometry motif from visual reference */
+.stepped-pattern {
+  background-image: linear-gradient(to right, rgba(16, 42, 30, 0.08) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(16, 42, 30, 0.08) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F4F1EA;
+}
+::-webkit-scrollbar-thumb {
+  background: #18241D;
+}

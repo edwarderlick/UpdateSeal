@@ -1,0 +1,95 @@
+{
+  "networkName": "studio-dev",
+  "rpcUrl": "https://studio-dev.genlayer.com/api",
+  "chainId": 61997,
+  "environment": "GenLayer Studio-dev / Studio Next preview",
+  "contractName": "UpdateSealRegistry",
+  "contractAddress": "0xCdf0410A2883c27983d5C3062E40F88dfc83c5E3",
+  "deployerAddress": "0xb3F7518df619ef485f7a1568ED3705bB6f5B0407",
+  "deploymentTransactionId": "0x8d8179e0ca8875a6cced3564575f98167e5b75245ec5a9c245fe4516016e9897",
+  "deploymentConsensusStatus": "FINALIZED",
+  "deploymentExecutionResult": "FINISHED_WITH_RETURN",
+  "deploymentFinalized": true,
+  "deployedAtUtc": "2026-10-22T06:43:32Z",
+  "localContractSha256": "10de3620c1fb37553a7ea013ef87165df5844f05577c8b42a9d29a6736e8fba2",
+  "cliVersion": "0.40.0-rc.5",
+  "genvmVersion": "v0.6.0-rc8",
+  "genLayerDependencyPin": "py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng",
+  "evidenceSchemaVersion": 2,
+  "schema": {
+    "contractName": "UpdateSealRegistry",
+    "writeMethods": [
+      "register_package",
+      "submit_candidate",
+      "evaluate_candidate"
+    ],
+    "viewMethods": [
+      "candidate_count",
+      "candidate_exists",
+      "candidate_id_at",
+      "get_candidate",
+      "get_candidate_id",
+      "get_package",
+      "get_package_uid",
+      "package_count",
+      "package_exists",
+      "package_uid_at"
+    ],
+    "writeCount": 3,
+    "viewCount": 10,
+    "get_protocol_infoPresent": false,
+    "note": "Generated schema names package_count/package_uid_at/candidate_count/candidate_id_at without a get_ prefix. get_protocol_info is not in this contract. This address evaluates Evidence Schema v2."
+  },
+  "explorer": {
+    "baseUrl": "https://explorer-studio-dev.genlayer.com/",
+    "transactionUrlTemplate": "https://explorer-studio-dev.genlayer.com/tx/{hash}",
+    "addressUrlTemplate": "https://explorer-studio-dev.genlayer.com/address/{address}",
+    "deploymentTransactionUrl": "https://explorer-studio-dev.genlayer.com/tx/0x8d8179e0ca8875a6cced3564575f98167e5b75245ec5a9c245fe4516016e9897",
+    "contractUrl": "https://explorer-studio-dev.genlayer.com/address/0xCdf0410A2883c27983d5C3062E40F88dfc83c5E3",
+    "smokeTestTransactionUrl": "https://explorer-studio-dev.genlayer.com/tx/0x23686eed1d58c899d0da855ef044b3b2e9730c23530e6832d8e87ce600a9a312"
+  },
+  "smokeTest": {
+    "registrationTransactionId": "0x23686eed1d58c899d0da855ef044b3b2e9730c23530e6832d8e87ce600a9a312",
+    "consensusStatus": "FINALIZED",
+    "accepted": true,
+    "executionResult": "FINISHED_WITH_RETURN",
+    "finalized": true,
+    "packageSlug": "updateseal-v2-e2e",
+    "packageUid": "0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal-v2-e2e",
+    "repositoryUrl": "https://github.com/edwarderlick/Provider-Court",
+    "baselineCommitSha": "3f278c3f80a657950873c26145ab1ef867d40af5",
+    "charterHash": "69591b822164cdc2aa5015e5acdc140f4271c7642d00bc7526b969e5d5705270",
+    "sequence": 0,
+    "packageCount": 1,
+    "candidateCount": 0,
+    "readBackVerified": true,
+    "candidateSubmitted": false,
+    "evaluateCandidateCalled": false
+  },
+  "previousDeployment": {
+    "evidenceSchemaVersion": 1,
+    "contractName": "UpdateSealRegistry",
+    "contractAddress": "0x6A882db328782051dFf05C40F4C34b3F223cd80A",
+    "deployerAddress": "0x1e47d7d7079fe4ad599b184559ffcdc56278fb54",
+    "deploymentTransactionId": "0x34aa204c1020d2247e657c28128f095d89c514f4825bd4344850db452c1bbb8b",
+    "deploymentConsensusStatus": "FINALIZED",
+    "deploymentExecutionResult": "FINISHED_WITH_RETURN",
+    "deploymentFinalized": true,
+    "deployedAtUtc": "2026-10-21T00:00:00Z",
+    "localContractSha256": "734cac74c31a4d7cf7cc272e24a2a0608c311414fe54eb64c82f03a7056db131",
+    "cliVersion": "0.40.0-rc.5",
+    "genLayerDependencyPin": "py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng",
+    "explorer": {
+      "deploymentTransactionUrl": "https://explorer-studio-dev.genlayer.com/tx/0x34aa204c1020d2247e657c28128f095d89c514f4825bd4344850db452c1bbb8b",
+      "contractUrl": "https://explorer-studio-dev.genlayer.com/address/0x6A882db328782051dFf05C40F4C34b3F223cd80A",
+      "smokeTestTransactionUrl": "https://explorer-studio-dev.genlayer.com/tx/0x40056279fcc8891faf2c2ede017ea61723aa9a819bac8501b390da63ceef0a4d"
+    },
+    "smokeTest": {
+      "registrationTransactionId": "0x40056279fcc8891faf2c2ede017ea61723aa9a819bac8501b390da63ceef0a4d",
+      "packageSlug": "updateseal-smoke",
+      "packageUid": "0x1e47d7d7079fe4ad599b184559ffcdc56278fb54/updateseal-smoke"
+    },
+    "note": "Legacy Evidence Schema v1 deployment. Do not send Evidence Schema v2 candidates to this address. v1 and v2 evidence documents are incompatible."
+  },
+  "note": "Active deployment evaluates Evidence Schema v2. Legacy v1 lives under previousDeployment. Studio-dev is a preview environment and may reset. Do not resubmit a transaction solely because receipt polling timed out; resume tracking the saved transaction ID. Candidate submission and evaluation remain separate transactions. evaluate_candidate is not wired into the frontend."
+}
