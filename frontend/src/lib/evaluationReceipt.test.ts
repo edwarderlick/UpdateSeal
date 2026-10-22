@@ -33,6 +33,7 @@ const SNAPSHOT = createPendingEvaluationSnapshot({
   candidateCommitSha: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
   evidenceUri: 'https://raw.githubusercontent.com/edwarderlick/UpdateSeal/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/e.json',
   evidenceHash: 'e0abffcfc03bcc53fb1a51094de1db934be9460a86d058e745efcb7180ff29ba',
+  originalStatus: 'PENDING',
   originalEvaluationAttempts: 0,
   callerAddress: CALLER,
   chainId: 61997,
@@ -168,6 +169,27 @@ describe('evaluation snapshot', () => {
     expect(snapshotContainsSecrets({ ...SNAPSHOT, privateKey: '0xabc' })).toBe(true);
   });
 
+  it('preserves EVIDENCE_UNAVAILABLE originalStatus and previous attempts', () => {
+    const retrySnapshot = createPendingEvaluationSnapshot({
+      transactionHash: TX,
+      candidateId: SNAPSHOT.candidateId,
+      packageUid: SNAPSHOT.packageUid,
+      version: SNAPSHOT.version,
+      candidateCommitSha: SNAPSHOT.candidateCommitSha,
+      evidenceUri: SNAPSHOT.evidenceUri,
+      evidenceHash: SNAPSHOT.evidenceHash,
+      originalStatus: 'EVIDENCE_UNAVAILABLE',
+      originalEvaluationAttempts: 2,
+      callerAddress: CALLER,
+      chainId: 61997,
+      contractAddress: '0xCdf0410A2883c27983d5C3062E40F88dfc83c5E3',
+      feeEstimateWei: 123n,
+      submitter: PACKAGE.publisher,
+    });
+    expect(retrySnapshot.originalStatus).toBe('EVIDENCE_UNAVAILABLE');
+    expect(retrySnapshot.originalEvaluationAttempts).toBe(2);
+  });
+
   it('persists public snapshot across reload and wallet-independent keys', () => {
     saveEvaluationSnapshot(SNAPSHOT);
     const loaded = loadEvaluationSnapshot(SNAPSHOT.chainId, SNAPSHOT.contractAddress, SNAPSHOT.candidateId);
@@ -197,6 +219,28 @@ describe('evaluation read-back', () => {
     expect(
       (await verifyEvaluationReadBack({ snapshot: SNAPSHOT, candidate: unavailable, packageRecord: PACKAGE, decodedStatus: null }))
         .ok,
+    ).toBe(true);
+    const retrySnapshot = createPendingEvaluationSnapshot({
+      ...SNAPSHOT,
+      originalStatus: 'EVIDENCE_UNAVAILABLE',
+      originalEvaluationAttempts: 1,
+    });
+    const stillUnavailable = await completedRecord(
+      'EVIDENCE_UNAVAILABLE',
+      4,
+      ['EVIDENCE_FETCH_FAILED'],
+      'Evidence unavailable',
+    );
+    stillUnavailable.evaluation_attempts = 2;
+    expect(
+      (
+        await verifyEvaluationReadBack({
+          snapshot: retrySnapshot,
+          candidate: stillUnavailable,
+          packageRecord: PACKAGE,
+          decodedStatus: 'EVIDENCE_UNAVAILABLE',
+        })
+      ).ok,
     ).toBe(true);
   });
 

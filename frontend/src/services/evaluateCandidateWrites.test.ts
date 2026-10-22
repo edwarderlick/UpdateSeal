@@ -176,4 +176,72 @@ describe('evaluateCandidate writes', () => {
     expect(writeContract.mock.calls[0][0].functionName).toBe('evaluate_candidate');
     expect(result.status).toBe('APPROVED');
   });
+
+  it('retry write preserves EVIDENCE_UNAVAILABLE snapshot and accepts remaining unavailable read-back', async () => {
+    const retryConfirmation: EvaluationConfirmation = {
+      ...confirmation,
+      originalStatus: 'EVIDENCE_UNAVAILABLE',
+      originalEvaluationAttempts: 1,
+    };
+    const hash = await computeDecisionHash({
+      candidate_id: CANDIDATE_ID,
+      charter_hash: 'c9fdc0131fe857370dd86b80b031cdc2a4520d492d891cd805e6900c10e8e959',
+      decision_code: 4,
+      decision_name: 'EVIDENCE_UNAVAILABLE',
+      evidence_hash: confirmation.evidenceHash,
+      finding_codes: ['EVIDENCE_FETCH_FAILED'],
+      summary: 'Evidence unavailable',
+    });
+    writeContract.mockResolvedValue(TX);
+    waitForTransactionReceipt.mockResolvedValue({
+      statusName: 'FINALIZED',
+      txExecutionResultName: 'FINISHED_WITH_RETURN',
+      hash: TX,
+      consensus_data: { leader_receipt: [{ result: 'EVIDENCE_UNAVAILABLE', execution_result: 'FINISHED_WITH_RETURN' }] },
+    });
+    const snapshots: Array<{ originalStatus?: string; originalEvaluationAttempts?: number }> = [];
+    getCandidateFn.mockResolvedValue({
+      candidate_id: CANDIDATE_ID,
+      package_uid: confirmation.packageUid,
+      version: confirmation.version,
+      candidate_commit_sha: confirmation.candidateCommitSha,
+      evidence_uri: confirmation.evidenceUri,
+      evidence_hash: confirmation.evidenceHash,
+      submitter: confirmation.submitter,
+      status: 'EVIDENCE_UNAVAILABLE',
+      decision_code: 4,
+      decision_summary: 'Evidence unavailable',
+      evaluation_attempts: 2,
+      finding_codes_json: '["EVIDENCE_FETCH_FAILED"]',
+      decision_hash: hash,
+    });
+    getPackageFn.mockResolvedValue({
+      package_uid: confirmation.packageUid,
+      package_slug: 'updateseal',
+      publisher: confirmation.submitter,
+      repository_url: 'https://github.com/edwarderlick/UpdateSeal',
+      baseline_commit_sha: 'b5d498fa08949e1e0f5113fb2f9d154368dfa97c',
+      charter_json: '{}',
+      charter_hash: 'c9fdc0131fe857370dd86b80b031cdc2a4520d492d891cd805e6900c10e8e959',
+      sequence: 1,
+    });
+    const result = await evaluateCandidate(
+      { confirmation: retryConfirmation },
+      {
+        client,
+        config: liveConfig,
+        getCandidateFn,
+        getPackageFn,
+        onProgress: (event) => {
+          if (event.snapshot) {
+            snapshots.push(event.snapshot);
+          }
+        },
+      },
+    );
+    expect(writeContract).toHaveBeenCalledTimes(1);
+    expect(snapshots[0]?.originalStatus).toBe('EVIDENCE_UNAVAILABLE');
+    expect(snapshots[0]?.originalEvaluationAttempts).toBe(1);
+    expect(result.status).toBe('EVIDENCE_UNAVAILABLE');
+  });
 });

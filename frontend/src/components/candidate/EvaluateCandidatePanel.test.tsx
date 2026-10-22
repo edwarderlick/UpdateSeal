@@ -122,6 +122,17 @@ const PENDING: OnChainCandidateRecord = {
   decision_hash: '',
 };
 
+const UNAVAILABLE: OnChainCandidateRecord = {
+  ...APPROVED,
+  candidate_id: `${OFFICIAL.package_uid}@0.1.0-unavailable`,
+  version: '0.1.0-unavailable',
+  status: 'EVIDENCE_UNAVAILABLE',
+  decision_code: 4,
+  decision_summary: 'Evidence could not be fetched',
+  evaluation_attempts: 1,
+  finding_codes_json: '["EVIDENCE_FETCH_FAILED"]',
+};
+
 function renderDetail(version: string) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const path = liveCandidateRecordPath(OFFICIAL.publisher, OFFICIAL.package_slug, version);
@@ -245,7 +256,70 @@ describe('live evaluation UI', () => {
       liveCandidateDecisionPath(OFFICIAL.publisher, OFFICIAL.package_slug, APPROVED.version),
     );
     expect(screen.queryByTestId('request-evaluation')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('retry-evaluation')).not.toBeInTheDocument();
     expect(estimateLiveEvaluation).not.toHaveBeenCalled();
+  });
+
+  it('EVIDENCE_UNAVAILABLE disconnected shows Connect Wallet to Retry Evaluation without auto-opening the modal', async () => {
+    getCandidate.mockResolvedValue(UNAVAILABLE);
+    renderDetail(UNAVAILABLE.version);
+    expect(await screen.findByTestId('connect-to-evaluate')).toHaveTextContent(/Connect Wallet to Retry Evaluation/i);
+    expect(screen.getByText(/Retry evidence evaluation/i)).toBeInTheDocument();
+    expect(screen.getByText(/incurs a new GenLayer fee/i)).toBeInTheDocument();
+    expect(openWalletModal).not.toHaveBeenCalled();
+    expect(estimateLiveEvaluation).not.toHaveBeenCalled();
+    expect(submitLiveEvaluation).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('retry-evaluation')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('request-evaluation')).not.toBeInTheDocument();
+  });
+
+  it('EVIDENCE_UNAVAILABLE connected/correct network shows Retry Evaluation and does not auto-submit', async () => {
+    wallet.isConnected = true;
+    wallet.address = '0x82fde1090c2941e5d8742a944813ebfc09c91c12';
+    getCandidate.mockResolvedValue(UNAVAILABLE);
+    renderDetail(UNAVAILABLE.version);
+    expect(await screen.findByTestId('retry-evaluation')).toBeDisabled();
+    expect(screen.getByTestId('estimate-evaluation-fee')).toBeInTheDocument();
+    expect(screen.queryByTestId('request-evaluation')).not.toBeInTheDocument();
+    expect(submitLiveEvaluation).not.toHaveBeenCalled();
+  });
+
+  it('wrong-network retry cannot submit', async () => {
+    wallet.isConnected = true;
+    wallet.address = '0x82fde1090c2941e5d8742a944813ebfc09c91c12';
+    wallet.chainId = 1;
+    getCandidate.mockResolvedValue(UNAVAILABLE);
+    renderDetail(UNAVAILABLE.version);
+    expect(await screen.findByTestId('evaluate-wrong-network')).toBeInTheDocument();
+    expect(screen.queryByTestId('retry-evaluation')).not.toBeInTheDocument();
+    expect(submitLiveEvaluation).not.toHaveBeenCalled();
+  });
+
+  it('unresolved snapshot disables Retry Evaluation', async () => {
+    wallet.isConnected = true;
+    wallet.address = '0x82fde1090c2941e5d8742a944813ebfc09c91c12';
+    const snapshot = createPendingEvaluationSnapshot({
+      transactionHash: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+      candidateId: UNAVAILABLE.candidate_id,
+      packageUid: UNAVAILABLE.package_uid,
+      version: UNAVAILABLE.version,
+      candidateCommitSha: UNAVAILABLE.candidate_commit_sha,
+      evidenceUri: UNAVAILABLE.evidence_uri,
+      evidenceHash: UNAVAILABLE.evidence_hash,
+      originalStatus: 'EVIDENCE_UNAVAILABLE',
+      originalEvaluationAttempts: 1,
+      callerAddress: wallet.address,
+      chainId: 61997,
+      contractAddress: '0xCdf0410A2883c27983d5C3062E40F88dfc83c5E3',
+      feeEstimateWei: 1n,
+      submitter: UNAVAILABLE.submitter,
+    });
+    loadEvaluationSnapshot.mockReturnValue(snapshot);
+    getCandidate.mockResolvedValue(UNAVAILABLE);
+    renderDetail(UNAVAILABLE.version);
+    expect(await screen.findByTestId('check-existing-transaction')).toHaveTextContent('Check Existing Transaction');
+    expect(screen.queryByTestId('retry-evaluation')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('request-evaluation')).not.toBeInTheDocument();
   });
 
   it('unresolved snapshot disables new evaluation and keeps the hash', async () => {
@@ -259,6 +333,7 @@ describe('live evaluation UI', () => {
       candidateCommitSha: PENDING.candidate_commit_sha,
       evidenceUri: PENDING.evidence_uri,
       evidenceHash: PENDING.evidence_hash,
+      originalStatus: 'PENDING',
       originalEvaluationAttempts: 0,
       callerAddress: wallet.address,
       chainId: 61997,
@@ -303,6 +378,7 @@ describe('live evaluation UI', () => {
       candidateCommitSha: PENDING.candidate_commit_sha,
       evidenceUri: PENDING.evidence_uri,
       evidenceHash: PENDING.evidence_hash,
+      originalStatus: 'PENDING',
       originalEvaluationAttempts: 0,
       callerAddress: wallet.address,
       chainId: 61997,

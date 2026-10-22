@@ -195,21 +195,31 @@ describe('evaluateCandidate orchestration', () => {
     expect(evaluateFn).not.toHaveBeenCalled();
   });
 
-  it.each(['APPROVED', 'REVIEW_REQUIRED', 'VIOLATION', 'EVIDENCE_UNAVAILABLE'] as const)(
+  it.each(['APPROVED', 'REVIEW_REQUIRED', 'VIOLATION'] as const)(
     '%s candidate makes zero writes',
     async (status) => {
       getCandidateFn.mockResolvedValue({ ...PENDING, status });
       const result = await estimateLiveEvaluation(liveInput(), deps);
       expect(result.ok).toBe(false);
       if (!result.ok) {
-        expect(result.phase).toBe('candidate_not_pending');
+        expect(result.phase).toBe('candidate_not_evaluatable');
       }
       expect(evaluateFn).not.toHaveBeenCalled();
       expect(createWriteClientFn).not.toHaveBeenCalled();
     },
   );
 
-  it('only PENDING enables evaluation estimate', async () => {
+  it('unknown status is ineligible and makes zero writes', async () => {
+    getCandidateFn.mockResolvedValue({ ...PENDING, status: 'UNKNOWN' });
+    const result = await estimateLiveEvaluation(liveInput(), deps);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.phase).toBe('candidate_not_evaluatable');
+    }
+    expect(evaluateFn).not.toHaveBeenCalled();
+  });
+
+  it('PENDING enables evaluation estimate with originalStatus PENDING', async () => {
     const result = await estimateLiveEvaluation(liveInput(), deps);
     expect(result).toMatchObject({ ok: true, phase: 'ready' });
     expect(estimateFn).toHaveBeenCalledWith(
@@ -221,6 +231,23 @@ describe('evaluateCandidate orchestration', () => {
     );
     expect(evaluateFn).not.toHaveBeenCalled();
     expect(writeContract).not.toHaveBeenCalled();
+    if (result.ok && result.phase === 'ready') {
+      expect(result.confirmation.originalStatus).toBe('PENDING');
+    }
+  });
+
+  it('EVIDENCE_UNAVAILABLE is eligible and estimates a paid retry', async () => {
+    const unavailable = { ...PENDING, status: 'EVIDENCE_UNAVAILABLE' as const, evaluation_attempts: 1 };
+    getCandidateFn.mockResolvedValue(unavailable);
+    const result = await estimateLiveEvaluation(liveInput(), deps);
+    expect(result).toMatchObject({ ok: true, phase: 'ready' });
+    if (result.ok && result.phase === 'ready') {
+      expect(result.confirmation.originalStatus).toBe('EVIDENCE_UNAVAILABLE');
+      expect(result.confirmation.originalEvaluationAttempts).toBe(1);
+      expect(result.estimate.candidateId).toBe(PENDING.candidate_id);
+      expect(result.estimate.senderAddress).toBe(SENDER);
+    }
+    expect(evaluateFn).not.toHaveBeenCalled();
   });
 
   it('zero/malformed estimate is returned as fee failure without write', async () => {
@@ -336,6 +363,7 @@ describe('evaluateCandidate orchestration', () => {
       candidateCommitSha: PENDING.candidate_commit_sha,
       evidenceUri: PENDING.evidence_uri,
       evidenceHash: PENDING.evidence_hash,
+      originalStatus: 'PENDING',
       originalEvaluationAttempts: 0,
       callerAddress: SENDER,
       chainId: 61997,
@@ -357,6 +385,7 @@ describe('evaluateCandidate orchestration', () => {
       candidateCommitSha: PENDING.candidate_commit_sha,
       evidenceUri: PENDING.evidence_uri,
       evidenceHash: PENDING.evidence_hash,
+      originalStatus: 'PENDING',
       originalEvaluationAttempts: 0,
       callerAddress: SENDER,
       chainId: 61997,
@@ -406,6 +435,7 @@ describe('evaluateCandidate orchestration', () => {
         candidateCommitSha: PENDING.candidate_commit_sha,
         evidenceUri: PENDING.evidence_uri,
         evidenceHash: PENDING.evidence_hash,
+        originalStatus: 'PENDING',
         originalEvaluationAttempts: 0,
         callerAddress: SENDER,
         chainId: 61997,
@@ -427,5 +457,89 @@ describe('evaluateCandidate orchestration', () => {
     expect(result.ok).toBe(true);
     expect(clearSnapshotFn).toHaveBeenCalled();
     expect(evaluateFn).toHaveBeenCalledTimes(1);
+  });
+
+  it('EVIDENCE_UNAVAILABLE retry snapshot preserves status and previous attempts', async () => {
+    const unavailable = { ...PENDING, status: 'EVIDENCE_UNAVAILABLE' as const, evaluation_attempts: 2 };
+    getCandidateFn.mockResolvedValue(unavailable);
+    const retryConfirmation = confirmation({
+      originalStatus: 'EVIDENCE_UNAVAILABLE',
+      originalEvaluationAttempts: 2,
+    });
+    evaluateFn.mockImplementation(async (_params, writeDeps: { onProgress?: (event: { snapshot?: { originalStatus?: string; originalEvaluationAttempts?: number } }) => void }) => {
+      const snapshot = createPendingEvaluationSnapshot({
+        transactionHash: TX,
+        candidateId: PENDING.candidate_id,
+        packageUid: PENDING.package_uid,
+        version: PENDING.version,
+        candidateCommitSha: PENDING.candidate_commit_sha,
+        evidenceUri: PENDING.evidence_uri,
+        evidenceHash: PENDING.evidence_hash,
+        originalStatus: 'EVIDENCE_UNAVAILABLE',
+        originalEvaluationAttempts: 2,
+        callerAddress: SENDER,
+        chainId: 61997,
+        contractAddress: liveConfig.contractAddress,
+        feeEstimateWei: estimate.feeValue,
+        submitter: PENDING.submitter,
+      });
+      writeDeps.onProgress?.({ snapshot });
+      return {
+        transactionHash: TX,
+        candidateId: PENDING.candidate_id,
+        record: unavailable,
+        packageRecord: PACKAGE,
+        consensusStatus: 'FINALIZED',
+        status: 'EVIDENCE_UNAVAILABLE',
+      };
+    });
+    const result = await submitLiveEvaluation({ ...liveInput(), confirmation: retryConfirmation }, deps);
+    expect(result.ok).toBe(true);
+    expect(saveSnapshotFn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        originalStatus: 'EVIDENCE_UNAVAILABLE',
+        originalEvaluationAttempts: 2,
+      }),
+    );
+    expect(evaluateFn).toHaveBeenCalledTimes(1);
+  });
+
+  it('status change from EVIDENCE_UNAVAILABLE to APPROVED before write performs zero writes', async () => {
+    getCandidateFn.mockResolvedValue({ ...PENDING, status: 'APPROVED', evaluation_attempts: 1 });
+    const result = await submitLiveEvaluation(
+      {
+        ...liveInput(),
+        confirmation: confirmation({ originalStatus: 'EVIDENCE_UNAVAILABLE', originalEvaluationAttempts: 1 }),
+      },
+      deps,
+    );
+    expect(result.ok).toBe(false);
+    expect(evaluateFn).not.toHaveBeenCalled();
+  });
+
+  it('EVIDENCE_UNAVAILABLE attempts change before write performs zero writes', async () => {
+    getCandidateFn.mockResolvedValue({ ...PENDING, status: 'EVIDENCE_UNAVAILABLE', evaluation_attempts: 3 });
+    const result = await submitLiveEvaluation(
+      {
+        ...liveInput(),
+        confirmation: confirmation({ originalStatus: 'EVIDENCE_UNAVAILABLE', originalEvaluationAttempts: 1 }),
+      },
+      deps,
+    );
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.phase).toBe('stale_confirmation');
+    }
+    expect(evaluateFn).not.toHaveBeenCalled();
+  });
+
+  it('PENDING changing to EVIDENCE_UNAVAILABLE before write is stale and performs zero writes', async () => {
+    getCandidateFn.mockResolvedValue({ ...PENDING, status: 'EVIDENCE_UNAVAILABLE', evaluation_attempts: 1 });
+    const result = await submitLiveEvaluation({ ...liveInput(), confirmation: confirmation() }, deps);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.phase).toBe('stale_confirmation');
+    }
+    expect(evaluateFn).not.toHaveBeenCalled();
   });
 });

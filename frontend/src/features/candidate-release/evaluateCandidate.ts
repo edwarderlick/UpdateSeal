@@ -5,6 +5,7 @@ import {
   type GenLayerReadClient,
 } from '../../lib/genlayerClient';
 import { parseCandidateId } from '../../lib/candidateId';
+import { isCandidateEvaluationEligible } from '../../lib/evaluationEligibility';
 import {
   clearEvaluationSnapshot,
   loadEvaluationSnapshot,
@@ -33,6 +34,7 @@ export type EvaluatePhase =
   | 'wallet_disconnected'
   | 'wrong_network'
   | 'candidate_not_pending'
+  | 'candidate_not_evaluatable'
   | 'candidate_not_found'
   | 'invalid_candidate_id'
   | 'estimating_fees'
@@ -107,7 +109,8 @@ function phaseFromError(error: UpdateSealError, snapshot?: PendingEvaluationSnap
     INVALID_CANDIDATE_ID: 'invalid_candidate_id',
     CANDIDATE_NOT_FOUND: 'candidate_not_found',
     CONTRACT_NOT_FOUND: 'candidate_not_found',
-    CANDIDATE_NOT_PENDING: 'candidate_not_pending',
+    CANDIDATE_NOT_PENDING: 'candidate_not_evaluatable',
+    CANDIDATE_NOT_EVALUATABLE: 'candidate_not_evaluatable',
     EVALUATION_ALREADY_PENDING: 'evaluation_already_pending',
     FEE_ESTIMATION_FAILED: 'fee_estimation_failed',
     FEE_ESTIMATE_INVALID: 'fee_estimate_invalid',
@@ -182,10 +185,10 @@ export async function assertEvaluateEligibility(
     throw new UpdateSealError('CANDIDATE_NOT_FOUND', `Candidate '${parsed.candidateId}' was not found.`);
   }
   const record = await getCandidateFn(parsed.candidateId);
-  if (record.status !== 'PENDING') {
+  if (!isCandidateEvaluationEligible(record.status)) {
     throw new UpdateSealError(
-      'CANDIDATE_NOT_PENDING',
-      `Only PENDING candidates can be evaluated. Current status is ${record.status}.`,
+      'CANDIDATE_NOT_EVALUATABLE',
+      'This candidate cannot be evaluated from its current status.',
     );
   }
   const packageRecord = await getPackageFn(record.package_uid);
@@ -213,7 +216,7 @@ export function confirmationFromRecord(args: {
     evidenceUri: args.record.evidence_uri,
     evidenceHash: args.record.evidence_hash,
     submitter: args.record.submitter,
-    originalStatus: 'PENDING',
+    originalStatus: isCandidateEvaluationEligible(args.record.status) ? args.record.status : 'PENDING',
     originalEvaluationAttempts: args.record.evaluation_attempts,
     callerAddress: args.sender,
     chainId: args.chainId,
@@ -234,8 +237,11 @@ export function confirmationIsStale(
   if (live.record.candidate_id !== confirmation.candidateId) {
     return 'Candidate ID changed.';
   }
-  if (live.record.status !== 'PENDING') {
-    return 'Candidate is no longer PENDING.';
+  if (live.record.status !== confirmation.originalStatus) {
+    return `Candidate status changed from ${confirmation.originalStatus} to ${live.record.status}.`;
+  }
+  if (!isCandidateEvaluationEligible(live.record.status)) {
+    return 'This candidate cannot be evaluated from its current status.';
   }
   if (live.record.evaluation_attempts !== confirmation.originalEvaluationAttempts) {
     return 'evaluation_attempts changed.';
@@ -418,7 +424,7 @@ function createFrozenSnapshotFromConfirmation(
     candidateCommitSha: confirmation.candidateCommitSha,
     evidenceUri: confirmation.evidenceUri,
     evidenceHash: confirmation.evidenceHash,
-    originalStatus: 'PENDING' as const,
+    originalStatus: confirmation.originalStatus,
     originalEvaluationAttempts: confirmation.originalEvaluationAttempts,
     callerAddress: confirmation.callerAddress,
     chainId: confirmation.chainId,

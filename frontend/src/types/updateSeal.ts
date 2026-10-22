@@ -147,7 +147,7 @@ export interface PendingEvaluationSnapshot {
   readonly candidateCommitSha: string;
   readonly evidenceUri: string;
   readonly evidenceHash: string;
-  readonly originalStatus: 'PENDING';
+  readonly originalStatus: 'PENDING' | 'EVIDENCE_UNAVAILABLE';
   readonly originalEvaluationAttempts: number;
   readonly callerAddress: `0x${string}`;
   readonly chainId: number;
@@ -177,7 +177,7 @@ export interface EvaluationConfirmation {
   readonly evidenceUri: string;
   readonly evidenceHash: string;
   readonly submitter: string;
-  readonly originalStatus: 'PENDING';
+  readonly originalStatus: 'PENDING' | 'EVIDENCE_UNAVAILABLE';
   readonly originalEvaluationAttempts: number;
   readonly callerAddress: `0x${string}`;
   readonly chainId: number;

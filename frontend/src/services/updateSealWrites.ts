@@ -790,6 +790,7 @@ export async function evaluateCandidate(
     candidateCommitSha: confirmation.candidateCommitSha,
     evidenceUri: confirmation.evidenceUri,
     evidenceHash: confirmation.evidenceHash,
+    originalStatus: confirmation.originalStatus,
     originalEvaluationAttempts: confirmation.originalEvaluationAttempts,
     callerAddress: sender,
     chainId: confirmation.chainId,

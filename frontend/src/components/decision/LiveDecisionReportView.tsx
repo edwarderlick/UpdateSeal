@@ -6,6 +6,8 @@ import type { CompletedVerdictStatus, LiveDecisionInspection } from '../../lib/d
 import { ON_CHAIN_INTEGRITY_ERROR, safeExternalHref } from '../../lib/decisionReport';
 import { liveCandidateRecordPath, livePackagePath } from '../../lib/registrationValidation';
 import { HashField } from './HashField';
+import { EvaluateCandidatePanel } from '../candidate/EvaluateCandidatePanel';
+import { isCandidateEvaluationEligible } from '../../lib/evaluationEligibility';
 
 const PRESENTATION: Record<
   CompletedVerdictStatus,
@@ -243,8 +245,7 @@ export const LiveDecisionReportView: React.FC<{ inspection: LiveDecisionInspecti
               Evaluation Pending
             </h1>
             <p className="text-base mt-4 max-w-3xl leading-relaxed">
-              This candidate has no completed verdict. Evaluation is a separate on-chain write and is not started from
-              this public report.
+              This candidate has no completed verdict. Request Evaluation from this page starts the first attempt.
             </p>
           </section>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -257,6 +258,9 @@ export const LiveDecisionReportView: React.FC<{ inspection: LiveDecisionInspecti
             />
           </div>
           <IdentityPanel inspection={inspection} />
+          {isCandidateEvaluationEligible(candidate.status) ? (
+            <EvaluateCandidatePanel candidate={candidate} packageRecord={packageRecord} />
+          ) : null}
           <Link
             to={candidatePath}
             className="w-fit bg-brand-cream hover:bg-stone-200 text-brand-charcoal font-bold p-3 text-center border-2 border-brand-charcoal shadow-[2px_2px_0px_#0B130E] uppercase font-mono text-xs"
@@ -344,6 +348,9 @@ export const LiveDecisionReportView: React.FC<{ inspection: LiveDecisionInspecti
             </div>
           </div>
         </div>
+        {inspection.status === 'EVIDENCE_UNAVAILABLE' ? (
+          <EvaluateCandidatePanel candidate={candidate} packageRecord={packageRecord} />
+        ) : null}
       </div>
     </div>
   );

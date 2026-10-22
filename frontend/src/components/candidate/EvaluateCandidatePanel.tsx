@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { CopyButton } from '../ui/CopyButton';
 import { useEvaluateCandidate } from '../../features/candidate-release/useEvaluateCandidate';
 import { liveCandidateDecisionPath } from '../../lib/registrationValidation';
-import { isCompletedVerdictStatus } from '../../lib/decisionReport';
+import { getEvaluationAction, isTerminalEvaluationStatus } from '../../lib/evaluationEligibility';
 import { getUpdateSealConfigResult, isLiveReadsEnabled } from '../../lib/updateSealConfig';
 import type { OnChainCandidateRecord, OnChainPackageRecord } from '../../types/updateSeal';
 
@@ -34,7 +34,14 @@ export const EvaluateCandidatePanel: React.FC<{
     return null;
   }
 
-  if (isCompletedVerdictStatus(candidate.status) || evaluation.completed || evaluation.view.phase === 'finalized') {
+  const action = getEvaluationAction(candidate.status);
+  const resultAction = getEvaluationAction(evaluation.view.resultStatus ?? candidate.status);
+  const terminal =
+    isTerminalEvaluationStatus(candidate.status) ||
+    evaluation.completed ||
+    (evaluation.view.phase === 'finalized' && resultAction === 'terminal');
+
+  if (terminal) {
     const status = evaluation.view.resultStatus ?? candidate.status;
     return (
       <section className="bg-white border-2 border-brand-charcoal p-6 space-y-3 shadow-[4px_4px_0px_#0B130E]" data-testid="evaluation-complete">
@@ -51,11 +58,11 @@ export const EvaluateCandidatePanel: React.FC<{
     );
   }
 
-  if (candidate.status !== 'PENDING') {
+  if (action === 'unsupported') {
     return (
       <div className="bg-white border-2 border-brand-charcoal p-6" role="alert" data-testid="evaluate-unsupported">
         <h2 className="text-xl font-black uppercase">On-chain data integrity error</h2>
-        <p className="text-sm">This candidate cannot be evaluated from the frontend.</p>
+        <p className="text-sm">This candidate cannot be evaluated from its current status.</p>
       </div>
     );
   }
@@ -74,9 +81,34 @@ export const EvaluateCandidatePanel: React.FC<{
     !view.estimate ||
     view.estimate.feeValue <= 0n;
 
+  const isRetry = action === 'retry';
+  const submitLabel = isRetry ? 'Retry Evaluation' : 'Request Evaluation';
+  const submitTestId = isRetry ? 'retry-evaluation' : 'request-evaluation';
+  const connectLabel = isRetry ? 'Connect Wallet to Retry Evaluation' : 'Connect Wallet to Request Evaluation';
+
   return (
     <section className="bg-white border-2 border-brand-charcoal p-6 lg:p-8 space-y-4 shadow-[6px_6px_0px_#0B130E]" data-testid="evaluate-candidate-panel">
-      <h2 className="text-2xl font-black uppercase">Request evaluation</h2>
+      <h2 className="text-2xl font-black uppercase">
+        {isRetry ? 'Retry evidence evaluation' : 'Request candidate evaluation'}
+      </h2>
+      {isRetry ? (
+        <>
+          <p className="text-sm max-w-3xl">The previous evaluation completed with evidence unavailable.</p>
+          <p className="text-sm max-w-3xl">
+            The previous attempt could not retrieve or validate the evidence. Retrying submits a new transaction, incurs
+            a new GenLayer fee, and increments the evaluation-attempt count if finalized successfully.
+          </p>
+          <Link
+            to={decisionPath}
+            data-testid="view-decision-report"
+            className="inline-flex w-fit bg-white text-brand-charcoal px-5 py-3 text-xs font-bold uppercase border-2 border-brand-charcoal shadow-[4px_4px_0px_#0B130E] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange"
+          >
+            View Decision Report
+          </Link>
+        </>
+      ) : (
+        <p className="text-sm max-w-3xl">This starts the candidate's first evaluation attempt.</p>
+      )}
       <p className="text-sm max-w-3xl">
         Any connected wallet may request evaluation. The transaction pays the GenLayer evaluation fee but does not
         transfer package ownership.
@@ -153,7 +185,7 @@ export const EvaluateCandidatePanel: React.FC<{
           data-testid="connect-to-evaluate"
           className="px-5 py-3 bg-brand-charcoal text-brand-pastelYellow text-xs font-bold uppercase border-2 border-brand-charcoal focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange"
         >
-          Connect Wallet to Request Evaluation
+          {connectLabel}
         </button>
       ) : null}
 
@@ -203,10 +235,10 @@ export const EvaluateCandidatePanel: React.FC<{
               void evaluation.submit();
             }}
             disabled={requestDisabled}
-            data-testid="request-evaluation"
+            data-testid={submitTestId}
             className="px-5 py-3 bg-brand-orange text-white text-xs font-bold uppercase border-2 border-brand-charcoal disabled:opacity-50 shadow-[4px_4px_0px_#0B130E] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-charcoal"
           >
-            Request Evaluation
+            {submitLabel}
           </button>
         </div>
       ) : null}

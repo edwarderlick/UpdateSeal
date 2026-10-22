@@ -226,11 +226,11 @@ The active Studio-dev contract at `0xCdf0410A2883c27983d5C3062E40F88dfc83c5E3` e
 
 ### Live candidate evaluation
 
-`evaluate_candidate(candidate_id)` is a frontend wallet write. Any connected Studio-dev wallet may request evaluation of a **PENDING** candidate; the caller pays the GenLayer evaluation fee and does not become the package owner. The contract (not the caller) produces the verdict.
+`evaluate_candidate(candidate_id)` is a frontend wallet write. Any connected Studio-dev wallet may request evaluation of a **PENDING** candidate or explicitly retry an **EVIDENCE_UNAVAILABLE** candidate. Each attempt is a new transaction and GenLayer fee. The caller does not become the package owner. The contract (not the caller) produces the verdict. **APPROVED**, **REVIEW_REQUIRED**, and **VIOLATION** are terminal.
 
 The UI estimates the exact `evaluate_candidate` fee, requires an explicit **Request Evaluation** click, re-reads the candidate immediately before `writeContract`, stores an immutable public transaction snapshot, classifies the GenLayer receipt with `isSuccessful`, and verifies the finalized `get_candidate` / `get_package` read-back including the canonical decision hash. **Check Existing Transaction** only waits on that hash and never submits again.
 
-Frontend duplicate protection (PENDING-only, freshness checks, one write per confirmation, local unresolved snapshot) reduces accidental double requests. It cannot eliminate races from another wallet or browser. The existing approved candidate `…/updateseal@0.1.0-v2-smoke` must not be evaluated again. Studio-dev is a preview network and may reset.
+Frontend duplicate protection (PENDING and EVIDENCE_UNAVAILABLE eligibility, freshness checks, one write per confirmation, local unresolved snapshot) reduces accidental double requests. Retries are never automatic. **Check Existing Transaction** never writes. Frontend checks cannot eliminate races from another wallet or browser. The existing approved candidate `…/updateseal@0.1.0-v2-smoke` must not be evaluated again. Studio-dev is a preview network and may reset.
 
 ## Remaining product areas
 

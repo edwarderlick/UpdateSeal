@@ -23,7 +23,7 @@ import type {
   OnChainPackageRecord,
   PendingEvaluationSnapshot,
 } from '../../types/updateSeal';
-import { isCompletedVerdictStatus } from '../../lib/decisionReport';
+import { getEvaluationAction, isCandidateEvaluationEligible, isTerminalEvaluationStatus } from '../../lib/evaluationEligibility';
 
 export interface EvaluateCandidateViewState {
   phase: EvaluatePhase;
@@ -109,7 +109,10 @@ export function useEvaluateCandidate(
         confirmationRef.current = null;
         setView({
           phase: 'finalized',
-          message: `Evaluation complete. Status: ${result.success.status}.`,
+          message:
+            result.success.status === 'EVIDENCE_UNAVAILABLE'
+              ? 'Evaluation transaction succeeded. Evidence remains unavailable. A future retry requires a new confirmation, fee, and transaction.'
+              : `Evaluation complete. Status: ${result.success.status}.`,
           transactionHash: result.success.transactionHash,
           pendingSnapshot: null,
           confirmation: null,
@@ -278,10 +281,12 @@ export function useEvaluateCandidate(
     openWalletModal();
   }, [openWalletModal]);
 
-  const pending = Boolean(args.candidate && args.candidate.status === 'PENDING');
-  const completed = Boolean(args.candidate && isCompletedVerdictStatus(args.candidate.status));
+  const evaluationAction = getEvaluationAction(args.candidate?.status);
+  const pending = evaluationAction === 'request';
+  const eligible = isCandidateEvaluationEligible(args.candidate?.status);
+  const completed = isTerminalEvaluationStatus(args.candidate?.status);
   const canEstimate =
-    pending &&
+    eligible &&
     configResult.ok &&
     configResult.config.dataMode === 'live' &&
     wallet.isConnected &&
@@ -304,7 +309,9 @@ export function useEvaluateCandidate(
     configResult,
     wallet,
     isWrongNetwork,
+    evaluationAction,
     pending,
+    eligible,
     completed,
     canEstimate,
     canSubmit,

@@ -4,7 +4,8 @@ import { DataModeBadge } from '../components/ui/DataModeBadge';
 import { CopyButton } from '../components/ui/CopyButton';
 import { useOnChainCandidate, useOnChainPackageByPublisherSlug } from '../features/registry/registryQueries';
 import { deriveCandidateId } from '../lib/candidateValidation';
-import { inspectLiveDecision, isCompletedVerdictStatus, ON_CHAIN_INTEGRITY_ERROR } from '../lib/decisionReport';
+import { inspectLiveDecision, ON_CHAIN_INTEGRITY_ERROR } from '../lib/decisionReport';
+import { isCandidateEvaluationEligible, isTerminalEvaluationStatus } from '../lib/evaluationEligibility';
 import { getUpdateSealConfigResult, isLiveReadsEnabled } from '../lib/updateSealConfig';
 import { liveCandidateDecisionPath, liveCandidateReviewPath, livePackagePath } from '../lib/registrationValidation';
 import { logUpdateSealError, toUpdateSealError } from '../lib/updateSealErrors';
@@ -91,7 +92,8 @@ export const LiveCandidateDetailPage: React.FC = () => {
   }
 
   const inspection = inspectLiveDecision(record, pkg);
-  const completed = isCompletedVerdictStatus(record.status);
+  const completed = isTerminalEvaluationStatus(record.status);
+  const evaluable = isCandidateEvaluationEligible(record.status);
   const decisionPath = liveCandidateDecisionPath(pkg.publisher, pkg.package_slug, record.version);
   const reviewPath = liveCandidateReviewPath(pkg.publisher, pkg.package_slug, record.version);
 
@@ -177,17 +179,15 @@ export const LiveCandidateDetailPage: React.FC = () => {
               </Link>
             </div>
           ) : null}
+          {evaluable ? <EvaluateCandidatePanel candidate={record} packageRecord={pkg} /> : null}
           {record.status === 'PENDING' ? (
-            <>
-              <EvaluateCandidatePanel candidate={record} packageRecord={pkg} />
-              <Link
-                to={reviewPath}
-                data-testid="view-live-review"
-                className="inline-flex w-fit bg-white text-brand-charcoal px-5 py-3 text-xs font-bold uppercase border-2 border-brand-charcoal shadow-[4px_4px_0px_#0B130E] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange"
-              >
-                View evaluation progress
-              </Link>
-            </>
+            <Link
+              to={reviewPath}
+              data-testid="view-live-review"
+              className="inline-flex w-fit bg-white text-brand-charcoal px-5 py-3 text-xs font-bold uppercase border-2 border-brand-charcoal shadow-[4px_4px_0px_#0B130E] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange"
+            >
+              View evaluation progress
+            </Link>
           ) : null}
         </div>
       </section>
