@@ -8,10 +8,10 @@ The frontend uses **genlayer-js@2.0.0-rc.1** (exact version, no `^`/`~`) for Stu
 
 - `createClient({ chain: studioDevnet })` from `genlayer-js` / `genlayer-js/chains`
 - `client.readContract({ address, functionName, args })`
-- `client.writeContract({ address, functionName, args, account })` with the connected Reown/Wagmi wallet
+- `client.writeContract({ address, functionName, args, account })` with a Viem JSON-RPC Account for the connected Reown/Wagmi wallet
 - `client.waitForTransactionReceipt({ hash, waitUntil: 'finalized' })`
 
-Do not call UpdateSealRegistry with Wagmi or Viem EVM ABI helpers. The read-only client is a lazy singleton and does not require a connected wallet. Writes use a separate client bound to the connected account and wallet provider.
+Do not call UpdateSealRegistry with Wagmi or Viem EVM ABI helpers. The read-only client is a lazy singleton and does not require a connected wallet. Writes use a separate client bound to the connected account and wallet provider. Browser wallets require a Viem JSON-RPC Account object (`{ address, type: "json-rpc" }`) at every GenLayerJS estimate and write boundary. Plain address strings are used only for identity, UI display, snapshots, and UID derivation. Failures that happen before a transaction hash exists are preparation, wallet-rejection, or RPC errors. They are not contract rejections.
 
 ### Required public environment variables
 

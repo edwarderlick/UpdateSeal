@@ -42,7 +42,12 @@ function buttonLabel(args: {
   if (args.phase === 'wallet_rejected') {
     return 'Sign registration in wallet';
   }
-  if (args.phase === 'contract_rejected' || args.phase === 'duplicate' || args.phase === 'rpc_interrupted') {
+  if (
+    args.phase === 'contract_rejected' ||
+    args.phase === 'transaction_preparation_failed' ||
+    args.phase === 'duplicate' ||
+    args.phase === 'rpc_interrupted'
+  ) {
     return 'Review and try again';
   }
   if (args.phase === 'finalized') {
@@ -213,6 +218,7 @@ export const RegisterStep4Page: React.FC = () => {
                 {view.phase === 'wallet_rejected' && 'Rejected by wallet'}
                 {view.phase === 'wrong_network' && 'Wrong network'}
                 {view.phase === 'contract_rejected' && 'Contract rejected'}
+                {view.phase === 'transaction_preparation_failed' && 'Transaction could not be prepared'}
                 {view.phase === 'rpc_interrupted' && 'RPC / network interruption'}
                 {view.phase === 'status_unknown' && 'Status unknown'}
                 {view.phase === 'duplicate' && 'Package already registered'}

@@ -1,3 +1,9 @@
+import type { Account, Address } from 'viem';
+import {
+  assertJsonRpcWriteAccount,
+  toGenLayerJsonRpcAccount,
+  TRANSACTION_PREPARATION_FAILED_MESSAGE,
+} from '../lib/genlayerAccount';
 import type { GenLayerWriteClient } from '../lib/genlayerClient';
 import {
   classifyRegistrationReceipt,
@@ -76,6 +82,59 @@ function asRecord(value: unknown): Record<string, unknown> | null {
   return null;
 }
 
+function requireSenderWriteAccount(senderAddress: string): { sender: `0x${string}`; account: Account } {
+  if (typeof senderAddress !== 'string' || senderAddress.length === 0) {
+    throw new UpdateSealError('TRANSACTION_PREPARATION_FAILED', TRANSACTION_PREPARATION_FAILED_MESSAGE);
+  }
+  const sender = senderAddress.toLowerCase() as `0x${string}`;
+  if (!/^0x[0-9a-f]{40}$/.test(sender)) {
+    throw new UpdateSealError('SENDER_MISMATCH', 'Transaction sender must match the connected wallet.');
+  }
+  const account = toGenLayerJsonRpcAccount(sender as Address);
+  assertJsonRpcWriteAccount(account, sender);
+  return { sender, account };
+}
+
+function classifyPreChainWriteError(
+  error: unknown,
+  transactionHash: string | null,
+  walletCode: 'WALLET_REJECTED' | 'USER_REJECTED',
+  walletMessage: string,
+  statusUnknownMessage: string,
+  rpcMessage: string,
+): UpdateSealError {
+  if (error instanceof UpdateSealError) {
+    if (transactionHash && !error.transactionHash) {
+      return new UpdateSealError(error.code, error.userMessage, transactionHash);
+    }
+    return error;
+  }
+  if (isWalletRejection(error)) {
+    return new UpdateSealError(walletCode, walletMessage, transactionHash);
+  }
+  if (isReceiptTimeout(error)) {
+    return new UpdateSealError('STATUS_UNKNOWN', statusUnknownMessage, transactionHash);
+  }
+  const raw = error instanceof Error ? error.message : String(error);
+  const lower = raw.toLowerCase();
+  if (
+    lower.includes('fetch failed') ||
+    lower.includes('failed to fetch') ||
+    lower.includes('network') ||
+    lower.includes('econnreset') ||
+    lower.includes('etimedout')
+  ) {
+    if (transactionHash) {
+      return new UpdateSealError('STATUS_UNKNOWN', statusUnknownMessage, transactionHash);
+    }
+    return new UpdateSealError('RPC_UNAVAILABLE', rpcMessage, transactionHash);
+  }
+  if (!transactionHash) {
+    return new UpdateSealError('TRANSACTION_PREPARATION_FAILED', TRANSACTION_PREPARATION_FAILED_MESSAGE);
+  }
+  return new UpdateSealError('STATUS_UNKNOWN', statusUnknownMessage, transactionHash);
+}
+
 export function normalizeTransactionHash(value: unknown): `0x${string}` {
   if (typeof value === 'string' && TX_HASH_RE.test(value)) {
     return value as `0x${string}`;
@@ -112,45 +171,14 @@ export function assertLiveWritesEnabled(
 }
 
 function toWriteError(error: unknown, transactionHash: string | null = null): UpdateSealError {
-  if (error instanceof UpdateSealError) {
-    if (transactionHash && !error.transactionHash) {
-      return new UpdateSealError(error.code, error.userMessage, transactionHash);
-    }
-    return error;
-  }
-  if (isWalletRejection(error)) {
-    return new UpdateSealError('WALLET_REJECTED', 'Wallet rejected the registration signature.', transactionHash);
-  }
-  if (isReceiptTimeout(error)) {
-    return new UpdateSealError(
-      'STATUS_UNKNOWN',
-      'Transaction status is unknown. The registration may still be processing. Keep this hash and check status.',
-      transactionHash,
-    );
-  }
-  const raw = error instanceof Error ? error.message : String(error);
-  const lower = raw.toLowerCase();
-  if (
-    lower.includes('fetch failed') ||
-    lower.includes('failed to fetch') ||
-    lower.includes('network') ||
-    lower.includes('econnreset') ||
-    lower.includes('etimedout')
-  ) {
-    if (transactionHash) {
-      return new UpdateSealError(
-        'STATUS_UNKNOWN',
-        'Transaction status is unknown. The registration may still be processing. Keep this hash and check status.',
-        transactionHash,
-      );
-    }
-    return new UpdateSealError(
-      'RPC_UNAVAILABLE',
-      'Studio-dev RPC was interrupted. The transaction may still be processing.',
-      transactionHash,
-    );
-  }
-  return new UpdateSealError('CONTRACT_REJECTED', sanitizeUserError(error, 'The contract rejected this registration.'), transactionHash);
+  return classifyPreChainWriteError(
+    error,
+    transactionHash,
+    'WALLET_REJECTED',
+    'Wallet rejected the registration signature.',
+    'Transaction status is unknown. The registration may still be processing. Keep this hash and check status.',
+    'Studio-dev RPC was interrupted. The transaction may still be processing.',
+  );
 }
 
 export async function confirmRegistrationFromReceipt(
@@ -218,15 +246,12 @@ export async function registerPackage(
   deps: RegisterPackageWriteDeps,
 ): Promise<RegisterPackageSuccess> {
   const config = assertLiveWritesEnabled(deps);
-  const sender = params.senderAddress.toLowerCase() as `0x${string}`;
-  if (!/^0x[0-9a-f]{40}$/.test(sender)) {
-    throw new UpdateSealError('SENDER_MISMATCH', 'Transaction sender must match the connected wallet.');
-  }
+  const { sender, account } = requireSenderWriteAccount(params.senderAddress);
 
   const getPackageFn = deps.getPackageFn ?? getPackage;
   const writeArgs = [params.packageSlug, params.repositoryUrl, params.baselineCommitSha, params.charterJson];
   const estimateArgs = {
-    account: sender,
+    account,
     address: config.contractAddress,
     functionName: CONTRACT_METHODS.registerPackage,
     args: writeArgs,
@@ -257,7 +282,7 @@ export async function registerPackage(
   let rawHash: unknown;
   try {
     rawHash = await deps.client.writeContract({
-      account: sender,
+      account,
       address: config.contractAddress,
       functionName: CONTRACT_METHODS.registerPackage,
       args: writeArgs,
@@ -324,48 +349,13 @@ export interface SubmitCandidateWriteDeps {
 }
 
 function toCandidateWriteError(error: unknown, transactionHash: string | null = null): UpdateSealError {
-  if (error instanceof UpdateSealError) {
-    if (transactionHash && !error.transactionHash) {
-      return new UpdateSealError(error.code, error.userMessage, transactionHash);
-    }
-    return error;
-  }
-  if (isWalletRejection(error)) {
-    return new UpdateSealError('WALLET_REJECTED', 'Wallet rejected the candidate submission signature.', transactionHash);
-  }
-  if (isReceiptTimeout(error)) {
-    return new UpdateSealError(
-      'STATUS_UNKNOWN',
-      'Transaction status is unknown. The candidate submission may still be processing. Keep this hash and check status.',
-      transactionHash,
-    );
-  }
-  const raw = error instanceof Error ? error.message : String(error);
-  const lower = raw.toLowerCase();
-  if (
-    lower.includes('fetch failed') ||
-    lower.includes('failed to fetch') ||
-    lower.includes('network') ||
-    lower.includes('econnreset') ||
-    lower.includes('etimedout')
-  ) {
-    if (transactionHash) {
-      return new UpdateSealError(
-        'STATUS_UNKNOWN',
-        'Transaction status is unknown. The candidate submission may still be processing. Keep this hash and check status.',
-        transactionHash,
-      );
-    }
-    return new UpdateSealError(
-      'RPC_UNAVAILABLE',
-      'Studio-dev RPC was interrupted. The transaction may still be processing.',
-      transactionHash,
-    );
-  }
-  return new UpdateSealError(
-    'CONTRACT_REJECTED',
-    sanitizeUserError(error, 'The contract rejected this candidate submission.'),
+  return classifyPreChainWriteError(
+    error,
     transactionHash,
+    'WALLET_REJECTED',
+    'Wallet rejected the candidate submission signature.',
+    'Transaction status is unknown. The candidate submission may still be processing. Keep this hash and check status.',
+    'Studio-dev RPC was interrupted. The transaction may still be processing.',
   );
 }
 
@@ -457,10 +447,7 @@ export async function submitCandidate(
   deps: SubmitCandidateWriteDeps,
 ): Promise<SubmitCandidateSuccess> {
   const config = assertLiveWritesEnabled(deps);
-  const sender = params.senderAddress.toLowerCase() as `0x${string}`;
-  if (!/^0x[0-9a-f]{40}$/.test(sender)) {
-    throw new UpdateSealError('SENDER_MISMATCH', 'Transaction sender must match the connected wallet.');
-  }
+  const { sender, account } = requireSenderWriteAccount(params.senderAddress);
 
   const getCandidateFn = deps.getCandidateFn ?? getCandidate;
   const candidateExistsFn = deps.candidateExistsFn ?? candidateExists;
@@ -473,7 +460,7 @@ export async function submitCandidate(
     evidenceHash,
   ];
   const estimateArgs = {
-    account: sender,
+    account,
     address: config.contractAddress,
     functionName: CONTRACT_METHODS.submitCandidate,
     args: writeArgs,
@@ -504,7 +491,7 @@ export async function submitCandidate(
   let rawHash: unknown;
   try {
     rawHash = await deps.client.writeContract({
-      account: sender,
+      account,
       address: config.contractAddress,
       functionName: CONTRACT_METHODS.submitCandidate,
       args: writeArgs,
@@ -573,48 +560,13 @@ export interface EvaluateCandidateWriteDeps {
 }
 
 function toEvaluateWriteError(error: unknown, transactionHash: string | null = null): UpdateSealError {
-  if (error instanceof UpdateSealError) {
-    if (transactionHash && !error.transactionHash) {
-      return new UpdateSealError(error.code, error.userMessage, transactionHash);
-    }
-    return error;
-  }
-  if (isWalletRejection(error)) {
-    return new UpdateSealError('USER_REJECTED', 'Wallet rejected the evaluation signature.', transactionHash);
-  }
-  if (isReceiptTimeout(error)) {
-    return new UpdateSealError(
-      'STATUS_UNKNOWN',
-      'Transaction status is unknown. The evaluation may still be processing. Keep this hash and check status.',
-      transactionHash,
-    );
-  }
-  const raw = error instanceof Error ? error.message : String(error);
-  const lower = raw.toLowerCase();
-  if (
-    lower.includes('fetch failed') ||
-    lower.includes('failed to fetch') ||
-    lower.includes('network') ||
-    lower.includes('econnreset') ||
-    lower.includes('etimedout')
-  ) {
-    if (transactionHash) {
-      return new UpdateSealError(
-        'STATUS_UNKNOWN',
-        'Transaction status is unknown. The evaluation may still be processing. Keep this hash and check status.',
-        transactionHash,
-      );
-    }
-    return new UpdateSealError(
-      'RPC_UNAVAILABLE',
-      'Studio-dev RPC was interrupted. The transaction may still be processing.',
-      transactionHash,
-    );
-  }
-  return new UpdateSealError(
-    'TRANSACTION_REJECTED',
-    sanitizeUserError(error, 'The contract rejected this evaluation.'),
+  return classifyPreChainWriteError(
+    error,
     transactionHash,
+    'USER_REJECTED',
+    'Wallet rejected the evaluation signature.',
+    'Transaction status is unknown. The evaluation may still be processing. Keep this hash and check status.',
+    'Studio-dev RPC was interrupted. The transaction may still be processing.',
   );
 }
 
@@ -623,10 +575,7 @@ export async function estimateEvaluateCandidateFees(
   deps: EvaluateCandidateWriteDeps,
 ): Promise<EvaluationFeeEstimate> {
   const config = assertLiveWritesEnabled(deps);
-  const sender = params.senderAddress.toLowerCase() as `0x${string}`;
-  if (!/^0x[0-9a-f]{40}$/.test(sender)) {
-    throw new UpdateSealError('SENDER_MISMATCH', 'Transaction sender must match the connected wallet.');
-  }
+  const { sender, account } = requireSenderWriteAccount(params.senderAddress);
 
   const writeArgs = [params.candidateId];
   deps.onProgress?.({ phase: 'estimating_fees' });
@@ -634,7 +583,7 @@ export async function estimateEvaluateCandidateFees(
   let estimate: unknown;
   try {
     estimate = await deps.client.estimateTransactionFeesForWrite({
-      account: sender,
+      account,
       address: config.contractAddress,
       functionName: CONTRACT_METHODS.evaluateCandidate,
       args: writeArgs,
@@ -733,10 +682,7 @@ export async function evaluateCandidate(
 ): Promise<EvaluateCandidateSuccess> {
   const config = assertLiveWritesEnabled(deps);
   const confirmation = params.confirmation;
-  const sender = confirmation.callerAddress.toLowerCase() as `0x${string}`;
-  if (!/^0x[0-9a-f]{40}$/.test(sender)) {
-    throw new UpdateSealError('SENDER_MISMATCH', 'Transaction sender must match the connected wallet.');
-  }
+  const { sender, account } = requireSenderWriteAccount(confirmation.callerAddress);
   if (confirmation.estimate.method !== CONTRACT_METHODS.evaluateCandidate) {
     throw new UpdateSealError('STALE_CONFIRMATION', 'Fee estimate does not belong to evaluate_candidate.');
   }
@@ -771,7 +717,7 @@ export async function evaluateCandidate(
   let rawHash: unknown;
   try {
     rawHash = await deps.client.writeContract({
-      account: sender,
+      account,
       address: config.contractAddress,
       functionName: CONTRACT_METHODS.evaluateCandidate,
       args: [confirmation.candidateId],

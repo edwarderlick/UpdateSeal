@@ -342,4 +342,21 @@ describe('submitLiveCandidate', () => {
     expect(result.ok).toBe(true);
     expect(submitCandidateFn).toHaveBeenCalledTimes(1);
   });
+
+  it('maps preparation failure before a hash without calling it a contract rejection', async () => {
+    submitCandidateFn.mockRejectedValue(
+      new UpdateSealError(
+        'TRANSACTION_PREPARATION_FAILED',
+        'The wallet transaction could not be prepared. No transaction was submitted.',
+      ),
+    );
+    const result = await submitLiveCandidate(liveInput(), deps);
+    expect(result).toMatchObject({
+      ok: false,
+      phase: 'transaction_preparation_failed',
+    });
+    if (result.ok) return;
+    expect(result.phase).not.toBe('contract_rejected');
+    expect(result.transactionHash).toBeUndefined();
+  });
 });

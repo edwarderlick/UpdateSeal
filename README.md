@@ -27,7 +27,7 @@ The official project repository is `https://github.com/edwarderlick/UpdateSeal`.
 
 Studio-dev is a preview environment and may reset. Do not treat a Studio-dev address as durable mainnet state.
 
-Write methods used by the frontend: `register_package`, `submit_candidate`, `evaluate_candidate`.
+Write methods used by the frontend: `register_package`, `submit_candidate`, `evaluate_candidate`. Browser wallets must be passed to GenLayerJS as a Viem JSON-RPC Account object. Address strings remain the public identity used in snapshots, comparisons, and the UI. A failure before a transaction hash exists is not a contract rejection. The controlled frontend candidate smoke transaction is still pending.
 
 ### Public read architecture
 
@@ -36,7 +36,8 @@ Public reads use `createClient({ chain: studioDevnet })` and `client.readContrac
 | Layer | Responsibility |
 | :--- | :--- |
 | `frontend/src/lib/updateSealConfig.ts` | Validate public env (`RPC`, chain `61997`, contract address, `live`/`demo`) |
-| `frontend/src/lib/genlayerClient.ts` | Lazy singleton read-only GenLayerJS client |
+| `frontend/src/lib/genlayerClient.ts` | Lazy singleton read-only GenLayerJS client; write clients convert the connected address to a Viem JSON-RPC Account before estimate/write |
+| `frontend/src/lib/genlayerAccount.ts` | `toGenLayerJsonRpcAccount` helper used at every GenLayerJS write boundary |
 | `frontend/src/services/updateSealContract.ts` | Typed view methods and bounded registry snapshot |
 | `frontend/src/services/updateSealMappers.ts` | Contract records → view models |
 | `frontend/src/features/registry/registryQueries.ts` | TanStack Query hooks (`staleTime` 30s, retry 2) |
@@ -237,5 +238,5 @@ Frontend duplicate protection (PENDING and EVIDENCE_UNAVAILABLE eligibility, fre
 1. Live multi-validator review progress is not simulated from on-chain events; completed live candidates open the decision report.
 2. GitHub repository ownership is still unproven.
 3. Studio-dev preview state may reset.
-4. A separate controlled smoke test of a real PENDING candidate evaluation is still required. The existing APPROVED candidate must not be re-evaluated.
+4. A separate controlled smoke test of a real PENDING candidate evaluation is still required. The existing APPROVED candidate must not be re-evaluated. No on-chain candidate transaction has succeeded for `0.2.0-frontend-eval-smoke`.
 

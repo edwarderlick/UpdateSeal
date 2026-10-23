@@ -55,6 +55,7 @@ export type EvaluatePhase =
   | 'finalized'
   | 'user_rejected'
   | 'transaction_rejected'
+  | 'transaction_preparation_failed'
   | 'status_unknown'
   | 'readback_mismatch'
   | 'decision_integrity_error'
@@ -127,6 +128,7 @@ function phaseFromError(error: UpdateSealError, snapshot?: PendingEvaluationSnap
     WALLET_REJECTED: 'user_rejected',
     TRANSACTION_REJECTED: 'transaction_rejected',
     CONTRACT_REJECTED: 'transaction_rejected',
+    TRANSACTION_PREPARATION_FAILED: 'transaction_preparation_failed',
     STATUS_UNKNOWN: 'status_unknown',
     READBACK_MISMATCH: 'readback_mismatch',
     DECISION_INTEGRITY_ERROR: 'decision_integrity_error',

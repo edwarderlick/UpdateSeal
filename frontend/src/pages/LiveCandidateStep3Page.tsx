@@ -47,6 +47,9 @@ function buttonLabel(args: {
   if (args.phase === 'wallet_rejected') {
     return 'Sign candidate in wallet';
   }
+  if (args.phase === 'transaction_preparation_failed' || args.phase === 'contract_rejected' || args.phase === 'rpc_interrupted') {
+    return 'Review and try again';
+  }
   if (args.phase === 'finalized') {
     return 'Open candidate record';
   }
@@ -173,6 +176,7 @@ export const LiveCandidateStep3Page: React.FC = () => {
                 {view.phase === 'wrong_network' && 'Wrong network'}
                 {view.phase === 'wrong_publisher' && 'Wrong publisher'}
                 {view.phase === 'contract_rejected' && 'Contract rejected'}
+                {view.phase === 'transaction_preparation_failed' && 'Transaction could not be prepared'}
                 {view.phase === 'rpc_interrupted' && 'RPC / network interruption'}
                 {view.phase === 'status_unknown' && 'Status unknown'}
                 {view.phase === 'duplicate' && 'Candidate already exists'}

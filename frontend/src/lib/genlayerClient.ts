@@ -1,10 +1,15 @@
 import { createClient } from 'genlayer-js';
 import { studioDevnet } from 'genlayer-js/chains';
-import type { TransactionFeeEstimate, TransactionFeeOptions, WriteFeeEstimateOptions } from 'genlayer-js/types';
+import type { TransactionFeeEstimate, TransactionFeeOptions } from 'genlayer-js/types';
+import type { Account, Address } from 'viem';
+import { toGenLayerJsonRpcAccount } from './genlayerAccount';
 import { getUpdateSealConfig } from './updateSealConfig';
 
-export type RegisterWriteFeeEstimateArgs = Pick<WriteFeeEstimateOptions, 'address' | 'functionName' | 'args'> & {
-  account?: WriteFeeEstimateOptions['account'] | `0x${string}`;
+export type RegisterWriteFeeEstimateArgs = {
+  account?: Account;
+  address: `0x${string}`;
+  functionName: string;
+  args?: unknown[];
 };
 
 export interface GenLayerReadClient {
@@ -29,7 +34,7 @@ export interface EthereumProviderLike {
 export interface GenLayerWriteClient {
   estimateTransactionFeesForWrite: (args: RegisterWriteFeeEstimateArgs) => Promise<TransactionFeeEstimate>;
   writeContract: (args: {
-    account?: `0x${string}`;
+    account?: Account;
     address: `0x${string}`;
     functionName: string;
     args?: unknown[];
@@ -59,13 +64,20 @@ export function getReadOnlyGenLayerClient(): GenLayerReadClient {
 }
 
 export function createWriteGenLayerClient(
-  account: `0x${string}`,
+  address: Address,
   provider: EthereumProviderLike,
 ): GenLayerWriteClient {
   getUpdateSealConfig();
+  const account = toGenLayerJsonRpcAccount(address);
+  // genlayer-js@2.0.0-rc.1 getCustomTransportConfig routes PROVIDER_METHODS
+  // (eth_sendTransaction) through the injected wallet only when
+  // `typeof config.account !== "object"`. Estimate/write still need a Viem
+  // JSON-RPC Account so SDK encoding can read `.address`. Passing the
+  // checksummed address string here is the narrow SDK-boundary exception that
+  // keeps wallet submission on the provider path.
   return createClient({
     chain: studioDevnet,
-    account,
+    account: account.address,
     provider,
   }) as unknown as GenLayerWriteClient;
 }

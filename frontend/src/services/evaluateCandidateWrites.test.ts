@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { getAddress, zeroAddress } from 'viem';
 import { MessageType } from 'genlayer-js';
+import { TRANSACTION_PREPARATION_FAILED_MESSAGE } from '../lib/genlayerAccount';
 import type { MessageFeeAllocationInput, TransactionFeeEstimate } from 'genlayer-js/types';
 import { parseUpdateSealConfig } from '../lib/updateSealConfig';
 import { VALID_LIVE_ENV } from '../test/updateSealFixtures';
@@ -96,7 +98,7 @@ describe('evaluateCandidate writes', () => {
       { client, config: liveConfig },
     );
     expect(estimateTransactionFeesForWrite).toHaveBeenCalledWith({
-      account: SENDER,
+      account: expect.objectContaining({ address: getAddress(SENDER), type: 'json-rpc' }),
       address: liveConfig.contractAddress,
       functionName: CONTRACT_METHODS.evaluateCandidate,
       args: [CANDIDATE_ID],
@@ -243,5 +245,62 @@ describe('evaluateCandidate writes', () => {
     expect(snapshots[0]?.originalStatus).toBe('EVIDENCE_UNAVAILABLE');
     expect(snapshots[0]?.originalEvaluationAttempts).toBe(1);
     expect(result.status).toBe('EVIDENCE_UNAVAILABLE');
+  });
+
+  it('passes the same JSON-RPC Account to estimate and write', async () => {
+    const result = await estimateEvaluateCandidateFees(
+      { candidateId: CANDIDATE_ID, senderAddress: SENDER },
+      { client, config: liveConfig },
+    );
+    expect(result.senderAddress).toBe(SENDER);
+    writeContract.mockResolvedValue(TX);
+    waitForTransactionReceipt.mockResolvedValue({
+      statusName: 'FINALIZED',
+      txExecutionResultName: 'FINISHED_WITH_ERROR',
+      hash: TX,
+    });
+    await expect(evaluateCandidate({ confirmation }, { client, config: liveConfig, getCandidateFn, getPackageFn })).rejects.toMatchObject({
+      code: 'TRANSACTION_REJECTED',
+      transactionHash: TX,
+    });
+    const estimateAccount = estimateTransactionFeesForWrite.mock.calls[0][0].account;
+    const writeAccount = writeContract.mock.calls[0][0].account;
+    expect(estimateAccount).toMatchObject({ address: getAddress(SENDER), type: 'json-rpc' });
+    expect(writeAccount).toMatchObject({ address: getAddress(SENDER), type: 'json-rpc' });
+    expect(estimateAccount.address).toBe(writeAccount.address);
+    expect(writeAccount.address.toLowerCase()).not.toBe(zeroAddress.toLowerCase());
+  });
+
+  it('preparation failure before a hash is not a contract rejection and creates no snapshot', async () => {
+    writeContract.mockRejectedValue(new Error('Address "undefined" is invalid'));
+    const snapshots: unknown[] = [];
+    await expect(
+      evaluateCandidate(
+        { confirmation },
+        {
+          client,
+          config: liveConfig,
+          getCandidateFn,
+          getPackageFn,
+          onProgress: (event) => {
+            if (event.snapshot) snapshots.push(event.snapshot);
+          },
+        },
+      ),
+    ).rejects.toMatchObject({
+      code: 'TRANSACTION_PREPARATION_FAILED',
+      userMessage: TRANSACTION_PREPARATION_FAILED_MESSAGE,
+      transactionHash: null,
+    });
+    expect(snapshots).toEqual([]);
+    expect(JSON.stringify(snapshots)).not.toMatch(/json-rpc/);
+  });
+
+  it('invalid account construction performs zero estimates and zero writes', async () => {
+    await expect(
+      estimateEvaluateCandidateFees({ candidateId: CANDIDATE_ID, senderAddress: '0x123' as `0x${string}` }, { client, config: liveConfig }),
+    ).rejects.toMatchObject({ code: 'SENDER_MISMATCH' });
+    expect(estimateTransactionFeesForWrite).not.toHaveBeenCalled();
+    expect(writeContract).not.toHaveBeenCalled();
   });
 });

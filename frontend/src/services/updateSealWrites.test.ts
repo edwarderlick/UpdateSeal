@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { getAddress, zeroAddress } from 'viem';
 import { parseUpdateSealConfig } from '../lib/updateSealConfig';
 import { UpdateSealError } from '../lib/updateSealErrors';
+import { TRANSACTION_PREPARATION_FAILED_MESSAGE } from '../lib/genlayerAccount';
 import type { GenLayerWriteClient } from '../lib/genlayerClient';
 import type { OnChainPackageRecord, RegisterPackageParams } from '../types/updateSeal';
 import { VALID_LIVE_ENV } from '../test/updateSealFixtures';
@@ -143,14 +145,14 @@ describe('updateSealWrites', () => {
     const writeArgs = [params.packageSlug, params.repositoryUrl, params.baselineCommitSha, params.charterJson];
     expect(estimateTransactionFeesForWrite).toHaveBeenCalledTimes(1);
     expect(estimateTransactionFeesForWrite).toHaveBeenCalledWith({
-      account: SENDER,
+      account: expect.objectContaining({ address: getAddress(SENDER), type: 'json-rpc' }),
       address: '0x6A882db328782051dFf05C40F4C34b3F223cd80A',
       functionName: 'register_package',
       args: writeArgs,
     });
     expect(writeContract).toHaveBeenCalledTimes(1);
     expect(writeContract).toHaveBeenCalledWith({
-      account: SENDER,
+      account: expect.objectContaining({ address: getAddress(SENDER), type: 'json-rpc' }),
       address: '0x6A882db328782051dFf05C40F4C34b3F223cd80A',
       functionName: 'register_package',
       args: writeArgs,
@@ -326,5 +328,77 @@ describe('updateSealWrites', () => {
     expect(estimateTransactionFeesForWrite).not.toHaveBeenCalled();
     expect(waitForTransactionReceipt).not.toHaveBeenCalled();
     expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it('passes the same JSON-RPC Account address to estimate and write', async () => {
+    writeContract.mockResolvedValue(TX_HASH);
+    waitForTransactionReceipt.mockResolvedValue(makeReceipt());
+    getPackageFn.mockResolvedValue(matchingRecord());
+    await registerPackage(params, { client, getPackageFn, config: liveConfig });
+    const estimateAccount = estimateTransactionFeesForWrite.mock.calls[0][0].account;
+    const writeAccount = writeContract.mock.calls[0][0].account;
+    expect(estimateAccount).toMatchObject({ address: getAddress(SENDER), type: 'json-rpc' });
+    expect(writeAccount).toMatchObject({ address: getAddress(SENDER), type: 'json-rpc' });
+    expect(estimateAccount.address).toBe(writeAccount.address);
+    expect(estimateAccount.address.toLowerCase()).not.toBe(zeroAddress.toLowerCase());
+  });
+
+  it('stores only the sender address string in the pending snapshot', async () => {
+    writeContract.mockResolvedValue(TX_HASH);
+    waitForTransactionReceipt.mockResolvedValue(makeReceipt());
+    getPackageFn.mockResolvedValue(matchingRecord());
+    const snapshots: unknown[] = [];
+    await registerPackage(params, {
+      client,
+      getPackageFn,
+      config: liveConfig,
+      onProgress: (event) => {
+        if (event.snapshot) snapshots.push(event.snapshot);
+      },
+    });
+    expect(snapshots.length).toBeGreaterThan(0);
+    for (const snapshot of snapshots) {
+      expect(snapshot).toMatchObject({ senderAddress: SENDER, transactionHash: TX_HASH });
+      expect(JSON.stringify(snapshot)).not.toMatch(/json-rpc/);
+      expect(snapshot).not.toHaveProperty('account');
+      expect(snapshot).not.toHaveProperty('type');
+    }
+  });
+
+  it('invalid account construction performs zero estimates and zero writes', async () => {
+    await expect(
+      registerPackage({ ...params, senderAddress: 'not-an-address' as `0x${string}` }, { client, getPackageFn, config: liveConfig }),
+    ).rejects.toMatchObject({ code: 'SENDER_MISMATCH' });
+    expect(estimateTransactionFeesForWrite).not.toHaveBeenCalled();
+    expect(writeContract).not.toHaveBeenCalled();
+  });
+
+  it('undefined sender is rejected before estimate or write', async () => {
+    await expect(
+      registerPackage({ ...params, senderAddress: undefined as unknown as `0x${string}` }, { client, getPackageFn, config: liveConfig }),
+    ).rejects.toMatchObject({ code: 'TRANSACTION_PREPARATION_FAILED' });
+    expect(estimateTransactionFeesForWrite).not.toHaveBeenCalled();
+    expect(writeContract).not.toHaveBeenCalled();
+  });
+
+  it('preparation failure before a hash creates no snapshot and is not contract rejection', async () => {
+    writeContract.mockRejectedValue(new Error('Address "undefined" is invalid'));
+    const snapshots: unknown[] = [];
+    await expect(
+      registerPackage(params, {
+        client,
+        getPackageFn,
+        config: liveConfig,
+        onProgress: (event) => {
+          if (event.snapshot) snapshots.push(event.snapshot);
+        },
+      }),
+    ).rejects.toMatchObject({
+      code: 'TRANSACTION_PREPARATION_FAILED',
+      userMessage: TRANSACTION_PREPARATION_FAILED_MESSAGE,
+      transactionHash: null,
+    });
+    expect(snapshots).toEqual([]);
+    expect(waitForTransactionReceipt).not.toHaveBeenCalled();
   });
 });
