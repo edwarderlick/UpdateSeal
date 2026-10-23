@@ -162,6 +162,24 @@ describe('submitRegistration', () => {
     expect(result).toMatchObject({ ok: false, phase: 'contract_rejected', transactionHash: TX_HASH });
   });
 
+  it('maps preparation failure before a hash without calling it a contract rejection', async () => {
+    registerPackageFn.mockRejectedValue(
+      new UpdateSealError(
+        'TRANSACTION_PREPARATION_FAILED',
+        'The wallet transaction could not be prepared. No transaction was submitted.',
+      ),
+    );
+    const result = await submitRegistration(liveInput(), deps);
+    expect(result).toMatchObject({
+      ok: false,
+      phase: 'transaction_preparation_failed',
+      message: 'The wallet transaction could not be prepared. No transaction was submitted.',
+    });
+    if (result.ok) return;
+    expect(result.transactionHash).toBeUndefined();
+    expect(result.phase).not.toBe('contract_rejected');
+  });
+
   it('timeout produces status unknown, not failed', async () => {
     registerPackageFn.mockRejectedValue(
       new UpdateSealError(

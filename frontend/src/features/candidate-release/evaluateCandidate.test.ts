@@ -692,4 +692,21 @@ describe('evaluateCandidate orchestration', () => {
     }
     expect(evaluateFn).not.toHaveBeenCalled();
   });
+
+  it('maps preparation failure before a hash without treating it as a contract rejection', async () => {
+    evaluateFn.mockRejectedValue(
+      new UpdateSealError(
+        'TRANSACTION_PREPARATION_FAILED',
+        'The wallet transaction could not be prepared. No transaction was submitted.',
+      ),
+    );
+    const result = await submitLiveEvaluation({ ...liveInput(), confirmation: confirmation() }, deps);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.phase).toBe('transaction_preparation_failed');
+      expect(result.phase).not.toBe('transaction_rejected');
+      expect(result.transactionHash).toBeUndefined();
+    }
+    expect(saveSnapshotFn).not.toHaveBeenCalled();
+  });
 });

@@ -35,6 +35,7 @@ export type RegistrationSubmitPhase =
   | 'finalized'
   | 'wallet_rejected'
   | 'contract_rejected'
+  | 'transaction_preparation_failed'
   | 'rpc_interrupted'
   | 'status_unknown'
   | 'demo';
@@ -119,6 +120,7 @@ function phaseFromError(error: UpdateSealError, snapshot?: PendingRegistrationSn
     WRONG_NETWORK: 'wrong_network',
     WALLET_REJECTED: 'wallet_rejected',
     CONTRACT_REJECTED: 'contract_rejected',
+    TRANSACTION_PREPARATION_FAILED: 'transaction_preparation_failed',
     RPC_UNAVAILABLE: 'rpc_interrupted',
     STATUS_UNKNOWN: 'status_unknown',
     DUPLICATE_PACKAGE: 'duplicate',
