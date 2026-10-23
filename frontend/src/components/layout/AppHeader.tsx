@@ -19,10 +19,12 @@ import {
 import { useWallet } from '../../features/wallet/useWallet';
 import { DataModeBadge } from '../ui/DataModeBadge';
 import { getUpdateSealConfigResult } from '../../lib/updateSealConfig';
+import { isDesignDemoPath } from '../../lib/designDemo';
 
 export const AppHeader: React.FC = () => {
   const location = useLocation();
   const configResult = getUpdateSealConfigResult();
+  const designDemoRoute = isDesignDemoPath(location.pathname);
   const {
     wallet,
     isConnecting,
@@ -82,7 +84,7 @@ export const AppHeader: React.FC = () => {
           {/* Site-wide Status Indicator */}
           <div className="relative inline-flex items-center gap-1.5">
             <span data-testid="demo-data-indicator">
-              <DataModeBadge />
+              <DataModeBadge forceDemo={designDemoRoute} />
             </span>
             <button
               type="button"
@@ -118,12 +120,16 @@ export const AppHeader: React.FC = () => {
                 </div>
                 <p className="leading-relaxed text-stone-800 font-medium font-sans">
                   {configResult.ok && configResult.config.dataMode === 'live'
-                    ? 'Public registry reads come from the deployed UpdateSealRegistry on Studio-dev. Writes, candidate submission, and evaluation remain unwired. Studio-dev may reset.'
+                    ? designDemoRoute
+                      ? 'This route is a preserved Stitch design preview. Package, release, review, and governance widgets here are DEMO DATA. They do not read or write the live Studio-dev contract.'
+                      : 'Public registry reads come from the deployed UpdateSealRegistry on Studio-dev. Connected wallets can register packages, submit candidates, and request evaluation after fee estimation. Studio-dev may reset.'
                     : 'Wallet and network information can be live. Package, release, review, validator, block and transaction records are demonstration data in demo mode.'}
                 </p>
                 <div className="mt-3 pt-2 border-t border-brand-charcoal/30 font-mono text-[10px] text-stone-600 flex justify-between">
                   <span>NETWORK: STUDIO-DEV (61997)</span>
-                  <span className="font-bold text-brand-forest">READS ONLY • WRITES UNWIRED</span>
+                  <span className="font-bold text-brand-forest">
+                    {designDemoRoute ? 'DESIGN PREVIEW' : configResult.ok && configResult.config.dataMode === 'live' ? 'LIVE READS + WALLET WRITES' : 'DEMO MODE'}
+                  </span>
                 </div>
               </div>
             )}
@@ -152,7 +158,7 @@ export const AppHeader: React.FC = () => {
 
         <div className="flex items-center gap-4 text-[11px]">
           <span className="text-stone-400 hidden sm:inline">
-            Interface: <strong className="text-stone-200 font-mono">Estimated interface only</strong>
+            Interface: <strong className="text-stone-200 font-mono">Studio-dev preview</strong>
           </span>
           <button
             type="button"

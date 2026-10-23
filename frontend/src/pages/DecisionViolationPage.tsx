@@ -2,10 +2,12 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ShieldAlert, AlertTriangle, Lock, Terminal, CheckCircle2, ArrowRight, ArrowLeft, Copy, ExternalLink } from 'lucide-react';
 import { CopyButton } from '../components/ui/CopyButton';
+import { DesignDemoBanner } from '../components/ui/DesignDemoBanner';
 
 export const DecisionViolationPage: React.FC = () => {
   return (
     <div className="flex flex-col w-full pb-16">
+      <DesignDemoBanner />
       {/* Topmost Dossier Bar with Breadcrumb Metadata */}
       <section className="bg-brand-charcoal text-white px-4 lg:px-12 py-2.5 border-b-2 border-brand-charcoal flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
         <div className="flex items-center gap-2 flex-wrap">

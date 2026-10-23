@@ -1,31 +1,25 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCandidate } from '../features/candidate-release/CandidateContext';
-import { useWallet } from '../features/wallet/useWallet';
 import { CandidateStepper } from '../components/forms/CandidateStepper';
 import { CopyButton } from '../components/ui/CopyButton';
-import { CheckCircle2, ShieldAlert, Cpu, AlertTriangle, ArrowLeft, Wallet } from 'lucide-react';
+import { DesignDemoBanner } from '../components/ui/DesignDemoBanner';
+import { CheckCircle2, ShieldAlert, Cpu, AlertTriangle, ArrowLeft } from 'lucide-react';
 
 export const CandidateStep3Page: React.FC = () => {
   const navigate = useNavigate();
   const { form, simulatedOutcome } = useCandidate();
-  const { wallet, openWalletModal } = useWallet();
   const [hasAgreed, setHasAgreed] = useState(false);
   const [showPendingNotice, setShowPendingNotice] = useState(false);
 
   const handleDispatch = () => {
     if (!hasAgreed) return;
-
-    if (!wallet.isConnected) {
-      openWalletModal();
-      return;
-    }
-
     setShowPendingNotice(true);
   };
 
   return (
     <div className="flex flex-col w-full pb-16">
+      <DesignDemoBanner />
       {/* Progress Header */}
       <section className="w-full bg-[#FAF8F4] py-8 border-b-2 border-brand-charcoal">
         <div className="max-w-[1440px] mx-auto px-4 lg:px-12">
@@ -35,7 +29,7 @@ export const CandidateStep3Page: React.FC = () => {
                 Governance Pipeline • Stage 03
               </span>
               <h1 className="font-black text-3xl lg:text-4xl uppercase text-brand-charcoal tracking-tight font-sans">
-                Candidate Release Finalization
+                Review &amp; Simulated Confirmation
               </h1>
             </div>
             <div className="flex items-center gap-2 font-mono text-xs text-brand-charcoal bg-white border-2 border-brand-charcoal px-4 py-2 shadow-[2px_2px_0px_#0B130E]">
@@ -293,11 +287,11 @@ export const CandidateStep3Page: React.FC = () => {
 
                 <div className="bg-brand-cream border-2 border-brand-charcoal p-4 shadow-[2px_2px_0px_#0B130E]">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="font-sans font-black text-sm uppercase text-brand-charcoal">6. Human Interlock Multisig</span>
+                    <span className="font-sans font-black text-sm uppercase text-brand-charcoal">6. Human Review Concept (Not Implemented)</span>
                     <span className="bg-brand-forest text-brand-pastelYellow font-mono font-bold text-[10px] px-2 py-0.5 border border-brand-charcoal">UNCHANGED</span>
                   </div>
                   <p className="font-sans text-xs text-stone-700 leading-relaxed">
-                    2-of-3 threshold preserved for critical state actions. Emergency shutdown signer addresses remain strictly invariant.
+                    Illustrative governance copy only. UpdateSealRegistry v1 does not implement on-chain multisig, escrow, or guardian sign-off.
                   </p>
                 </div>
               </div>
@@ -424,7 +418,7 @@ export const CandidateStep3Page: React.FC = () => {
                     </button>
                   </div>
                   <p className="font-sans text-xs text-stone-800 font-medium leading-relaxed">
-                    The UpdateSeal intelligent contract is pending deployment on GenLayer Studio Next. Candidate evaluation records are simulated in demo mode. No transactions are submitted on-chain yet.
+                    This Stitch screen is a local simulation. It does not call the contract, estimate fees, or request a wallet signature. Use the live candidate wizard on a publisher-scoped package to submit real Studio-dev transactions.
                   </p>
                   <button
                     type="button"
@@ -447,17 +441,10 @@ export const CandidateStep3Page: React.FC = () => {
                     : 'bg-stone-700 text-stone-400 cursor-not-allowed'
                 }`}
               >
-                {!wallet.isConnected ? (
-                  <>
-                    <Wallet className="w-4 h-4 text-brand-pastelYellow" />
-                    <span>CONNECT WALLET TO DISPATCH</span>
-                  </>
-                ) : (
-                  <>
-                    <span>SUBMIT CANDIDATE RELEASE</span>
-                    <Cpu className="w-4 h-4" />
-                  </>
-                )}
+                <>
+                  <span>SIMULATE CANDIDATE DISPATCH</span>
+                  <Cpu className="w-4 h-4" />
+                </>
               </button>
               <p className="font-mono text-[10px] text-stone-300 text-center mt-3">
                 Contract integration pending • GenLayer Studio Next (61997)

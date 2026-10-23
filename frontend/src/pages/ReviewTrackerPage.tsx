@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle2, Clock, ShieldAlert, Cpu, ExternalLink, RefreshCw } from 'lucide-react';
 import { CopyButton } from '../components/ui/CopyButton';
+import { DesignDemoBanner } from '../components/ui/DesignDemoBanner';
 
 type SimulationState = 'pending' | 'approved' | 'review_required' | 'violation' | 'unavailable';
 
@@ -11,6 +12,7 @@ export const ReviewTrackerPage: React.FC = () => {
 
   return (
     <div className="flex flex-col w-full pb-16">
+      <DesignDemoBanner />
       {/* Top Breadcrumb & Status Ribbon */}
       <div className="w-full bg-[#FAF8F4] border-b-2 border-brand-charcoal py-3 px-4 lg:px-12">
         <div className="max-w-[1440px] mx-auto flex flex-wrap items-center justify-between gap-4 font-mono text-xs">

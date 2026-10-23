@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { AlertCircle, CheckCircle2, Clock, ExternalLink, ShieldAlert, Terminal } from 'lucide-react';
 import { CopyButton } from '../components/ui/CopyButton';
 import { DataModeBadge } from '../components/ui/DataModeBadge';
+import { TrustBoundaryNotice } from '../components/ui/TrustBoundaryNotice';
 import { HashField } from '../components/decision/HashField';
 import { useLiveReleaseVerification } from '../features/registry/registryQueries';
 import { parseCandidateId, parsePackageUidAndVersion } from '../lib/candidateId';
@@ -239,6 +240,7 @@ export const LiveVerificationPage: React.FC = () => {
                 decision fields were read and validated. It does not mean every status is approved. Studio-dev is a
                 preview network and may reset.
               </p>
+              <TrustBoundaryNotice className="max-w-2xl" />
             </div>
             <div className="lg:col-span-4 bg-brand-forest text-white p-6 border-2 border-brand-charcoal shadow-[6px_6px_0px_#0B130E]">
               <div className="flex items-center justify-between">
@@ -384,7 +386,8 @@ export const LiveVerificationPage: React.FC = () => {
               <summary className="font-black uppercase cursor-pointer">Machine-readable result</summary>
               <p className="text-xs mt-3">
                 Assembled verification result from public contract reads. This JSON is not a single contract return
-                object.
+                object. Wallet registration does not prove GitHub repository ownership. Verdicts evaluate commit-pinned
+                evidence and do not directly control external deployment systems.
               </p>
               <pre className="mt-3 bg-stone-100 border border-brand-charcoal p-3 text-[11px] font-mono whitespace-pre-wrap break-all" data-testid="machine-json">
                 {displayedMachineJson(result, evidenceOutcome)}

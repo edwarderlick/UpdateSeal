@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { ArrowRight, ArrowLeft, GitCommit, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useCandidate } from '../features/candidate-release/CandidateContext';
 import { CandidateStepper } from '../components/forms/CandidateStepper';
+import { DesignDemoBanner } from '../components/ui/DesignDemoBanner';
 
 export const CandidateStep1Page: React.FC = () => {
   const navigate = useNavigate();
@@ -22,6 +23,7 @@ export const CandidateStep1Page: React.FC = () => {
 
   return (
     <div className="w-full flex flex-col animate-in fade-in duration-150">
+      <DesignDemoBanner />
       {/* Top Breadcrumbs */}
       <div className="bg-brand-cream border-b-2 border-brand-charcoal px-6 py-2.5 flex items-center justify-between font-mono text-xs">
         <div className="flex items-center gap-2">

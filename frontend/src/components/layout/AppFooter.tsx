@@ -22,7 +22,7 @@ export const AppFooter: React.FC = () => {
               </span>
             </div>
             <p className="text-xs text-stone-400 max-w-sm leading-relaxed mb-6 font-normal">
-              The on-chain release approval registry for autonomous AI agents, plugins, and self-updating software. Enforced by GenLayer Studio Next intelligent contracts.
+              The on-chain release approval registry for autonomous AI agents, plugins, and self-updating software. GenLayer Studio Next intelligent contracts record consensus-backed verdicts that downstream systems may consume.
             </p>
             <div className="text-[11px] font-mono text-stone-500">
               Chain ID 61997 • Consensus Engine: LLM Evaluator Multi-Validator
@@ -45,7 +45,7 @@ export const AppFooter: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/decisions/approved" className="hover:text-white transition-colors">
+                <Link to="/how-it-works" className="hover:text-white transition-colors">
                   Decision Reports
                 </Link>
               </li>
@@ -73,13 +73,16 @@ export const AppFooter: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/packages/atlas-research-agent" className="hover:text-white transition-colors">
-                  Egress Allowlist Policy
+                <Link
+                  to="/packages/0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal"
+                  className="hover:text-white transition-colors"
+                >
+                  Official Package Record
                 </Link>
               </li>
               <li>
-                <Link to="/decisions/review-required" className="hover:text-white transition-colors">
-                  Multisig Human Hooks
+                <Link to="/packages/atlas-research-agent" className="hover:text-white transition-colors">
+                  Design preview screens (not live)
                 </Link>
               </li>
             </ul>
@@ -92,7 +95,7 @@ export const AppFooter: React.FC = () => {
             <div className="bg-stone-900 p-3 border border-stone-800 text-[11px] font-mono space-y-1">
               <div className="text-emerald-400 font-bold">GENLAYER STUDIO NEXT</div>
               <div className="text-stone-400">Chain: 61997</div>
-              <div className="text-stone-400 truncate">Contract: Pending deployment</div>
+              <div className="text-stone-400 truncate">Contract: 0xCdf0410A2883c27983d5C3062E40F88dfc83c5E3</div>
               <button
                 type="button"
                 className="text-brand-orange hover:underline pt-1 block cursor-pointer font-bold"

@@ -2,10 +2,12 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircle2, ShieldCheck, Terminal } from 'lucide-react';
 import { CopyButton } from '../components/ui/CopyButton';
+import { DesignDemoBanner } from '../components/ui/DesignDemoBanner';
 
 export const DecisionApprovedPage: React.FC = () => {
   return (
     <div className="flex flex-col w-full pb-16">
+      <DesignDemoBanner />
       {/* Top Breadcrumb & Metadata Bar */}
       <div className="w-full bg-brand-cream border-b-2 border-brand-charcoal py-3 px-4 lg:px-12">
         <div className="max-w-[1440px] mx-auto flex flex-wrap items-center justify-between gap-3 font-mono text-xs text-brand-charcoal">

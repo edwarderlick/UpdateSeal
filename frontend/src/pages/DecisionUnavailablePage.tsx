@@ -2,10 +2,12 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { AlertCircle, RefreshCw, ArrowLeft, ArrowRight, ShieldAlert, Terminal, Lock } from 'lucide-react';
 import { CopyButton } from '../components/ui/CopyButton';
+import { DesignDemoBanner } from '../components/ui/DesignDemoBanner';
 
 export const DecisionUnavailablePage: React.FC = () => {
   return (
     <div className="flex flex-col w-full pb-16">
+      <DesignDemoBanner />
       {/* Top Breadcrumb & Metadata */}
       <section className="max-w-[1440px] mx-auto w-full px-4 lg:px-12 py-6 flex flex-col gap-6">
         <div className="flex flex-wrap items-center justify-between gap-4 bg-white border-2 border-brand-charcoal px-5 py-3 shadow-[4px_4px_0px_#0B130E] font-mono text-xs">
@@ -69,7 +71,7 @@ export const DecisionUnavailablePage: React.FC = () => {
               <span className="text-2xl font-black text-brand-pastelYellow">Non-Custodial</span>
             </div>
             <div className="bg-brand-charcoal border border-stone-800 p-4 flex flex-col gap-1 shadow-[3px_3px_0px_#000000]">
-              <span className="text-[11px] text-stone-400 uppercase font-bold tracking-wider">Financial Slashing</span>
+              <span className="text-[11px] text-stone-400 uppercase font-bold tracking-wider">Financial Slashing (Not Implemented)</span>
               <span className="text-2xl font-black text-white">None (0 GEN)</span>
             </div>
           </div>

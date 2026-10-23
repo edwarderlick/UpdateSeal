@@ -11,6 +11,7 @@ import {
   Code2,
 } from 'lucide-react';
 import { CopyButton } from '../components/ui/CopyButton';
+import { DesignDemoBanner } from '../components/ui/DesignDemoBanner';
 
 export const PackageDetailPage: React.FC = () => {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ export const PackageDetailPage: React.FC = () => {
 
   return (
     <div className="w-full flex flex-col animate-in fade-in duration-150">
+      <DesignDemoBanner />
       {/* Top Dossier Bar with Breadcrumb Metadata */}
       <div className="bg-brand-charcoal text-white px-6 py-2.5 border-b-2 border-brand-charcoal flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
         <div className="flex items-center gap-2 flex-wrap">
@@ -443,7 +445,7 @@ export const PackageDetailPage: React.FC = () => {
                     </td>
                     <td className="py-4 px-5 text-brand-charcoal">
                       <div className="font-bold text-brand-charcoal text-xs font-mono uppercase">
-                        Upgraded via 2-of-3 Multisig
+                        Illustrative human review (design demo)
                       </div>
                       <div className="font-sans text-[11px] text-stone-600">
                         Expanded arXiv rate limit from 10 req/m to 30 req/m. Manually approved.

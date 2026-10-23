@@ -71,12 +71,12 @@ export const MOCK_DECISIONS: Record<string, ReleaseDecision> = {
   },
   'review-required': {
     code: '0x02',
-    title: 'Governance Escalation: Multi-Sig Quorum Required',
+    title: 'Governance Escalation: Human Review Concept (Design Demo)',
     verdictLabel: '0x02 Review Required',
     summary:
-      'Candidate diff touches sensitive boundary thresholds or newly declared domain endpoints that exceed automated threshold parameters. Requires human-in-the-loop multi-sig review.',
+      'Candidate diff touches sensitive boundary thresholds or newly declared domain endpoints that exceed automated threshold parameters. Illustrative copy: human operators review outside this contract.',
     details:
-      'Validator consensus identified 1 new egress domain (api.mistral.ai) which requires manual ratification by at least 3 of 5 DAO multisig keyholders.',
+      'Illustrative validator copy identified 1 new egress domain (api.mistral.ai). UpdateSealRegistry v1 does not implement DAO multisig ratification. External systems may consume a live REVIEW_REQUIRED verdict.',
     heroBgClass: 'bg-brand-pastelYellow text-brand-charcoal',
     accentBadgeClass: 'bg-brand-charcoal text-brand-pastelYellow',
     consensusVote: '3/5 Flagged for Review',

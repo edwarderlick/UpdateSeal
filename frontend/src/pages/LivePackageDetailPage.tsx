@@ -8,6 +8,7 @@ import { getUpdateSealConfigResult, isLiveReadsEnabled } from '../lib/updateSeal
 import { liveCandidateWizardPath } from '../lib/registrationValidation';
 import { logUpdateSealError, toUpdateSealError } from '../lib/updateSealErrors';
 import { parseCharterJson } from '../services/updateSealMappers';
+import { TrustBoundaryNotice } from '../components/ui/TrustBoundaryNotice';
 
 function CharterList({ label, values }: { label: string; values: string[] }) {
   return (
@@ -136,6 +137,7 @@ export const LivePackageDetailPage: React.FC = () => {
 
       <section className="w-full bg-brand-cream px-6 lg:px-12 pt-8 pb-16 flex-grow">
         <div className="max-w-[1400px] mx-auto flex flex-col gap-8">
+          <TrustBoundaryNotice />
           <div className="bg-brand-forest text-brand-cream border-2 border-brand-charcoal p-8 lg:p-10 shadow-[8px_8px_0px_#0B130E]">
             <div className="flex flex-wrap items-center gap-3 font-mono text-xs mb-5">
               <span className="bg-stone-100 text-brand-charcoal px-3 py-1 uppercase font-bold border border-brand-charcoal">

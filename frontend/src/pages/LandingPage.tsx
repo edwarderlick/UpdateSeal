@@ -23,11 +23,11 @@ export const LandingPage: React.FC = () => {
       <div className="bg-brand-pastelYellow border-b border-brand-charcoal py-2 px-6 text-xs font-mono font-bold tracking-tight flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="inline-block w-2 h-2 bg-brand-orange"></span>
-          <span>GENLAYER STUDIO NEXT REGISTRY VERDICT: 99.84% PROVEN RUNTIME CONFORMANCE</span>
+          <span>GENLAYER STUDIO-DEV REGISTRY: EVIDENCE-BASED RELEASE VERDICTS</span>
         </div>
         <div className="hidden md:flex gap-6">
-          <span>STUDIO NEXT NETWORK • DEMO DATA</span>
-          <span>ZERO SILENT AGENT MUTATION</span>
+          <span>STUDIO-DEV NETWORK • ILLUSTRATIVE EDITORIAL</span>
+          <span>COMMIT-PINNED EVIDENCE</span>
         </div>
       </div>
 
@@ -58,7 +58,7 @@ export const LandingPage: React.FC = () => {
                 for autonomous software.
               </h1>
               <p className="text-lg md:text-xl font-normal text-stone-800 max-w-xl leading-relaxed mb-8">
-                UpdateSeal prevents silent capability drift in AI agents, tools, and autonomous plugins. Releases are verified against immutable charters on GenLayer Intelligent Contracts before execution.
+                UpdateSeal detects and records potential capability drift in AI agents, tools, and autonomous plugins. Releases are evaluated against immutable charters on GenLayer Intelligent Contracts before an operator chooses to deploy.
               </p>
             </div>
 
@@ -82,7 +82,7 @@ export const LandingPage: React.FC = () => {
                 to="/verify"
                 className="text-stone-700 hover:text-brand-orange text-xs font-mono font-bold uppercase px-3 py-2 flex items-center gap-1.5 underline underline-offset-4"
               >
-                <span>Simulate Query</span>
+                <span>Verify Release</span>
                 <ChevronRight className="w-3.5 h-3.5" />
               </Link>
             </div>
@@ -99,7 +99,7 @@ export const LandingPage: React.FC = () => {
                   </span>
                 </div>
                 <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-mono font-bold border border-emerald-400">
-                  STATUS: ENFORCING
+                  STATUS: EVALUATING
                 </span>
               </div>
 
@@ -161,7 +161,7 @@ export const LandingPage: React.FC = () => {
           </div>
           <div className="p-8">
             <span className="block text-4xl sm:text-5xl font-black text-brand-orange tracking-tight font-sans">19</span>
-            <span className="block text-xs uppercase tracking-wider font-bold text-stone-600 mt-1">Silent Drift Attempts Blocked</span>
+            <span className="block text-xs uppercase tracking-wider font-bold text-stone-600 mt-1">Illustrative drift findings recorded</span>
           </div>
           <div className="p-8">
             <span className="block text-4xl sm:text-5xl font-black text-brand-charcoal tracking-tight font-sans">61997</span>
@@ -187,7 +187,7 @@ export const LandingPage: React.FC = () => {
                 In the emerging autonomous software ecosystem, agents autonomously pull plugins, fetch updated weights, and invoke dynamic APIs. If a release secretly expands network scopes, requests new private file system privileges, or alters safety prompt baselines, host orchestrators are blind until funds or credentials leak.
               </p>
               <p className="font-medium text-white border-l-2 border-brand-pastelYellow pl-4">
-                UpdateSeal introduces <span className="text-brand-pastelYellow font-bold">Charter-Bound Releases</span>: immutable on-chain declarations specifying exactly what an agent can and cannot do. Every new version commit must be analyzed by GenLayer consensus before client execution.
+                UpdateSeal introduces <span className="text-brand-pastelYellow font-bold">Charter-Bound Releases</span>: immutable on-chain declarations specifying exactly what an agent can and cannot do. Every new version commit is evaluated by GenLayer consensus before an operator chooses to deploy.
               </p>
             </div>
           </div>
@@ -205,12 +205,12 @@ export const LandingPage: React.FC = () => {
                 </div>
                 <h3 className="text-xl font-bold uppercase tracking-tight mb-2 font-sans">Network Endpoint Whitelists</h3>
                 <p className="text-xs text-stone-700 leading-normal">
-                  Lock outbound HTTP/RPC domains. If a new patch touches an undeclared domain, the update candidate is instantly blocked.
+                  Charter outbound HTTP/RPC domains. If submitted evidence shows an undeclared domain, the candidate is recorded as a potential charter mismatch.
                 </p>
               </div>
               <div className="mt-6 pt-4 border-t border-stone-300 flex items-center justify-between text-[11px] font-mono">
                 <span>Checked by consensus</span>
-                <span className="text-brand-orange font-bold">Enforced</span>
+                <span className="text-brand-orange font-bold">Evaluated</span>
               </div>
             </div>
 
@@ -225,7 +225,7 @@ export const LandingPage: React.FC = () => {
                 </div>
                 <h3 className="text-xl font-bold uppercase tracking-tight mb-2 font-sans">Credential Permissions</h3>
                 <p className="text-xs text-stone-800 leading-normal">
-                  Prevents new code additions from inspecting environment variables, private keys, or enterprise OAuth tokens without human governance re-charter.
+                  Detects candidate evidence that inspects environment variables, private keys, or enterprise OAuth tokens without a matching charter declaration.
                 </p>
               </div>
               <div className="mt-6 pt-4 border-t border-stone-800 flex items-center justify-between text-[11px] font-mono">
@@ -245,12 +245,12 @@ export const LandingPage: React.FC = () => {
                 </div>
                 <h3 className="text-xl font-bold uppercase tracking-tight mb-2 font-sans">On-Chain Gas &amp; Spends</h3>
                 <p className="text-xs text-stone-800 leading-normal">
-                  Stipulate maximum transaction limits per epoch. Even if code changes, execution contracts cannot drain parent vault funds.
+                  Stipulate declared transaction limits per epoch in the frozen charter. Downstream operators may use the verdict when reviewing spend-scope drift.
                 </p>
               </div>
               <div className="mt-6 pt-4 border-t border-stone-800 flex items-center justify-between text-[11px] font-mono">
                 <span>Max allowance</span>
-                <span className="font-bold">Cap Enforced</span>
+                <span className="font-bold">Charter-declared</span>
               </div>
             </div>
 
@@ -328,7 +328,7 @@ export const LandingPage: React.FC = () => {
               </h2>
             </div>
             <p className="text-white/90 text-sm max-w-md mt-4 md:mt-0 font-medium">
-              Every package evaluation produces a machine-enforceable decision backed by GenLayer validator consensus.
+              Every package evaluation produces a machine-readable on-chain verdict backed by GenLayer validator consensus.
             </p>
           </div>
 
@@ -347,11 +347,11 @@ export const LandingPage: React.FC = () => {
                   APPROVED
                 </h3>
                 <p className="text-xs text-stone-600 leading-relaxed mb-4">
-                  Full consensus achieved. Release diff strictly adheres to the frozen charter. Safe for autonomous deployment.
+                  Full consensus achieved. Submitted evidence adheres to the frozen charter. Operators may choose to deploy using this verdict.
                 </p>
               </div>
               <div className="font-mono text-[11px] bg-stone-100 p-2 border border-stone-200">
-                Action: Deploy immediately →
+                Action: Verdict available to consumers →
               </div>
             </Link>
 
@@ -373,7 +373,7 @@ export const LandingPage: React.FC = () => {
                 </p>
               </div>
               <div className="font-mono text-[11px] bg-stone-100 p-2 border border-stone-200">
-                Action: Multisig human signoff →
+                Action: Human review outside this contract →
               </div>
             </Link>
 
@@ -395,7 +395,7 @@ export const LandingPage: React.FC = () => {
                 </p>
               </div>
               <div className="font-mono text-[11px] bg-red-50 text-red-900 p-2 border border-red-200 font-bold">
-                Action: Runtime Hard Rejection →
+                Action: Recorded violation verdict →
               </div>
             </Link>
 
@@ -430,13 +430,13 @@ export const LandingPage: React.FC = () => {
           <div className="mb-12">
             <div className="flex flex-wrap items-center gap-2 mb-2">
               <span className="sticker-badge bg-brand-pastelYellow text-brand-charcoal">Operational Protocol</span>
-              <span className="sticker-badge bg-brand-orange text-white">Planned Future Architecture</span>
+              <span className="sticker-badge bg-brand-orange text-white">Current Registry Flow</span>
             </div>
             <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-brand-charcoal font-sans">
               How UpdateSeal Secures The Pipeline
             </h2>
             <p className="text-sm font-mono text-stone-700 mt-2 font-bold">
-              Planned contract-backed workflow — not active in the current demo.
+              Live Studio-dev flow: register, submit commit-pinned evidence, evaluate, store a terminal verdict.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
@@ -470,9 +470,9 @@ export const LandingPage: React.FC = () => {
             </div>
             <div className="p-5 bg-brand-charcoal text-white border-2 border-brand-charcoal shadow-[3px_3px_0px_#EF5313]">
               <div className="text-2xl font-black text-brand-pastelYellow mb-2 font-mono">05</div>
-              <h4 className="font-bold uppercase text-sm mb-2 font-sans">Runtime Gate</h4>
+              <h4 className="font-bold uppercase text-sm mb-2 font-sans">Consumer Gate</h4>
               <p className="text-xs text-stone-300 leading-normal">
-                Agent host runner will call <code className="text-brand-pastelYellow font-mono text-[11px]">is_release_approved()</code> prior to loading bytecode.
+                Downstream systems may consume the stored on-chain verdict as a release-policy input. UpdateSeal does not itself halt external CI/CD.
               </p>
             </div>
           </div>

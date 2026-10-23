@@ -1,6 +1,88 @@
 # UpdateSeal — On-chain Release Approval Registry for Autonomous AI Software
 
-UpdateSeal is a decentralized release approval registry for autonomous AI agents, plugins, and self-updating software. Enforced by GenLayer Studio Next intelligent contracts, UpdateSeal validates candidate releases against immutable capability charters to prevent unauthorized network egress, unmonitored shell executions, filesystem escalations, and silent prompt injection vulnerabilities.
+UpdateSeal records consensus-backed evaluations of candidate releases against immutable capability charters, helping operators detect and review capability drift before choosing to deploy.
+
+## Live Proof & Reviewer Quick Links
+
+Live frontend: pending manual Vercel deployment
+
+### Project
+
+| Item | Link |
+| :--- | :--- |
+| GitHub repository | [https://github.com/edwarderlick/UpdateSeal](https://github.com/edwarderlick/UpdateSeal) |
+| Contract source | [contracts/UpdateSealRegistry.py](https://github.com/edwarderlick/UpdateSeal/blob/main/contracts/UpdateSealRegistry.py) |
+| Contract tests | [contracts/tests/test_registry_direct.py](https://github.com/edwarderlick/UpdateSeal/blob/main/contracts/tests/test_registry_direct.py) |
+| Deployment manifest | [deployments/studio-dev.json](https://github.com/edwarderlick/UpdateSeal/blob/main/deployments/studio-dev.json) |
+| Frontend README | [frontend/README.md](https://github.com/edwarderlick/UpdateSeal/blob/main/frontend/README.md) |
+| Contract README | [contracts/README.md](https://github.com/edwarderlick/UpdateSeal/blob/main/contracts/README.md) |
+| Vercel deployment guide | [docs/VERCEL_DEPLOYMENT.md](https://github.com/edwarderlick/UpdateSeal/blob/main/docs/VERCEL_DEPLOYMENT.md) |
+
+### Contract deployment
+
+| Item | Link |
+| :--- | :--- |
+| Contract explorer | [0xCdf0410A2883c27983d5C3062E40F88dfc83c5E3](https://explorer-studio-dev.genlayer.com/address/0xCdf0410A2883c27983d5C3062E40F88dfc83c5E3) |
+| Deployment transaction | [0x8d8179e0ca8875a6cced3564575f98167e5b75245ec5a9c245fe4516016e9897](https://explorer-studio-dev.genlayer.com/tx/0x8d8179e0ca8875a6cced3564575f98167e5b75245ec5a9c245fe4516016e9897) |
+| Official package registration | [0x2218c81a9a3e3f1e1dfb02234121611f808512c254e9bcf47a895628cea07ae0](https://explorer-studio-dev.genlayer.com/tx/0x2218c81a9a3e3f1e1dfb02234121611f808512c254e9bcf47a895628cea07ae0) |
+
+### Approved candidate proof
+
+Candidate: `0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal@0.1.0-v2-smoke`
+
+| Field | Value |
+| :--- | :--- |
+| Status | APPROVED |
+| Decision code | 1 |
+| Finding | NO_VIOLATION |
+| Decision hash | `c69ca06aa7f3b679600751df1fb7f6f11f1bcf1ec4e69e7173e5e45fffa80f97` |
+| Evidence hash | `e0abffcfc03bcc53fb1a51094de1db934be9460a86d058e745efcb7180ff29ba` |
+| Candidate commit | [d097c0e6ce20fdedd3bc86ab5d2e832e5d29d54f](https://github.com/edwarderlick/UpdateSeal/commit/d097c0e6ce20fdedd3bc86ab5d2e832e5d29d54f) |
+| Evidence | [evidence/evidence-v2.json](https://raw.githubusercontent.com/edwarderlick/UpdateSeal/d097c0e6ce20fdedd3bc86ab5d2e832e5d29d54f/evidence/evidence-v2.json) |
+| Candidate submission | [0x5545e2fbb76c8265b20b4fa03819ed1eeeb81f709171fd2cd860c4435e01a416](https://explorer-studio-dev.genlayer.com/tx/0x5545e2fbb76c8265b20b4fa03819ed1eeeb81f709171fd2cd860c4435e01a416) |
+| Evaluation | [0x0f911b652d9b66451ddafdb0aaf733acdb81542b4125376721d87c1f470cb408](https://explorer-studio-dev.genlayer.com/tx/0x0f911b652d9b66451ddafdb0aaf733acdb81542b4125376721d87c1f470cb408) |
+
+### Frontend end-to-end candidate proof
+
+Candidate: `0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal@0.2.0-frontend-eval-smoke`
+
+This candidate proves the production frontend wallet submission and evaluation flow. **REVIEW_REQUIRED** is a valid terminal verdict, not a failed transaction.
+
+| Field | Value |
+| :--- | :--- |
+| Status | REVIEW_REQUIRED |
+| Decision code | 2 |
+| Finding | POLICY_AMBIGUITY |
+| Decision hash | `ce4164ff14a720f33272bcbd8224d0450f4eefaac87cfbc7bc564006d91c783c` |
+| Evidence hash | `083ffec8059280df446286de38c35040dd86553c2d47496c6f8c632127c6315c` |
+| Candidate commit | [fee557c42e9dab4b8fc4eebd4b6f6482316840c7](https://github.com/edwarderlick/UpdateSeal/commit/fee557c42e9dab4b8fc4eebd4b6f6482316840c7) |
+| Evidence | [evidence/frontend-eval-smoke-v2.json](https://raw.githubusercontent.com/edwarderlick/UpdateSeal/fee557c42e9dab4b8fc4eebd4b6f6482316840c7/evidence/frontend-eval-smoke-v2.json) |
+| Frontend submission | [0xd07fbb240ee0e13eaa331bbadf55b50ecf0d0257a6a2cc4e8aaa22509e346fa1](https://explorer-studio-dev.genlayer.com/tx/0xd07fbb240ee0e13eaa331bbadf55b50ecf0d0257a6a2cc4e8aaa22509e346fa1) |
+| Frontend evaluation | [0xf4ee1038144c9e917e693149a09103d8322b3896cd888c7a06518ce9bbbf19e7](https://explorer-studio-dev.genlayer.com/tx/0xf4ee1038144c9e917e693149a09103d8322b3896cd888c7a06518ce9bbbf19e7) |
+
+### What the contract enforces
+
+- The package publisher registers an immutable baseline and capability charter.
+- Only that publisher may submit candidates for its publisher-scoped package.
+- GenLayer validators evaluate the commit-pinned, content-hashed evidence against the frozen charter.
+- The contract stores the candidate’s status, findings, attempts, and decision hash.
+- Completed APPROVED, REVIEW_REQUIRED, and VIOLATION decisions are terminal.
+- EVIDENCE_UNAVAILABLE may be retried only below the three-attempt maximum.
+- Public consumers can use the stored verdict as a release-policy input.
+
+UpdateSeal does not itself deploy software, halt external CI/CD systems, operate a multisig, hold escrow, or transfer funds. External release systems may choose to treat the on-chain verdict as a deployment gate.
+
+### Trust boundary and current limitations
+
+- Package identity is scoped by publisher wallet: `lowercase(publisher)/package_slug`.
+- Wallet registration proves which wallet created the package record.
+- It does not prove that the wallet owns the referenced GitHub repository.
+- Evidence is immutable and authenticated to the repository, candidate commit, exact raw URL, and exact SHA-256 bytes.
+- The contract validates the bounded Evidence Schema v2 document and evaluates it against the frozen charter.
+- The contract does not independently reconstruct or semantically audit every source-code diff from GitHub.
+- Submitter-authored evidence is treated as untrusted input and cannot override the evaluator instructions.
+- The result is an evidence-based release registry verdict, not a guarantee that software is vulnerability-free.
+- Studio-dev is a preview network and may reset.
 
 ---
 
@@ -144,10 +226,10 @@ D:\UpdateSeal
 | `/register/success` | Registration Confirmation & Sealed Baseline On-Chain Receipt |
 | `/packages/atlas-research-agent/releases/new/identity` | Candidate Release Submission — Step 1: Release Identity |
 | `/packages/atlas-research-agent/releases/new/evidence` | Candidate Release Submission — Step 2: Boundary Diff & Evidence |
-| `/packages/atlas-research-agent/releases/new/confirm` | Candidate Release Submission — Step 3: Review & Escrow Confirmation |
+| `/packages/atlas-research-agent/releases/new/confirm` | Candidate Release Submission — Step 3: Review, Fee Estimate & Wallet Confirmation (design demo) |
 | `/reviews/review-atlas-150` | Consensus Progress Tracker with Interactive Demo Preview Controls |
 | `/decisions/approved` | Decision Report `0x01`: Approved & Sealed On-Chain |
-| `/decisions/review-required` | Decision Report `0x02`: Review Required (Multi-Sig Governance) |
+| `/decisions/review-required` | Decision Report `0x02`: Review Required (design demo) |
 | `/decisions/capability-violation` | Decision Report `0x03`: Hard Capability Violation (Blocked) |
 | `/decisions/evidence-unavailable` | Decision Report `0x04`: Evidence Unavailable (Fetch Failure) |
 | `/verify` | Public live release verification (candidate ID or package UID + version; no wallet) |

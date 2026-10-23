@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowRight, ArrowLeft, Shield, AlertCircle } from 'lucide-react';
 import { useRegistration } from '../features/registration/RegistrationContext';
 import { RegisterStepper } from '../components/forms/RegisterStepper';
+import { TrustBoundaryNotice } from '../components/ui/TrustBoundaryNotice';
 
 export const RegisterStep1Page: React.FC = () => {
   const navigate = useNavigate();
@@ -40,8 +41,9 @@ export const RegisterStep1Page: React.FC = () => {
               REGISTER PACKAGE IDENTITY &amp; SOURCE REPO
             </h1>
             <p className="text-sm text-stone-700 max-w-2xl leading-relaxed font-medium">
-              Establish the cryptographic identity of your autonomous agent. UpdateSeal anchors your GitHub repository and publisher wallet into the immutable GenLayer Studio Next registry.
+              Establish the cryptographic identity of your autonomous agent. UpdateSeal records the repository URL you declare and the publisher wallet that creates the package. Wallet registration does not prove GitHub repository ownership.
             </p>
+            <TrustBoundaryNotice className="max-w-2xl mt-2" />
           </div>
         </div>
       </section>

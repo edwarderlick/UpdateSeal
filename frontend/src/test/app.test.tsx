@@ -197,7 +197,7 @@ describe('UpdateSeal Comprehensive Test Suite', () => {
     u9();
 
     const { unmount: u10 } = renderWithProviders(<HowItWorksPage />);
-    expect(screen.getByText(/How UpdateSeal Enforces Autonomous Agent Safety On-Chain/i)).toBeInTheDocument();
+    expect(screen.getByText(/How UpdateSeal Records Autonomous Agent Release Verdicts On-Chain/i)).toBeInTheDocument();
     u10();
   });
 
@@ -674,7 +674,7 @@ describe('Part 6 — Wagmi & Studio-dev Wallet Verification Suite', () => {
     u1();
 
     renderWithProviders(<DecisionReviewRequiredPage />);
-    const approveBtn = screen.getByRole('button', { name: /SIGN TO APPROVE EXPANSION/i });
+    const approveBtn = screen.getByRole('button', { name: /SIMULATE APPROVE EXPANSION/i });
     fireEvent.click(approveBtn);
     expect(screen.getByText(/Demo decision updated locally\. Contract integration pending; nothing was broadcast\./i)).toBeInTheDocument();
     expect(screen.queryByText(/BROADCASTING SIGNATURE/i)).not.toBeInTheDocument();

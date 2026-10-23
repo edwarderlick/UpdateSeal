@@ -10,6 +10,7 @@ import { getUpdateSealConfigResult, isLiveReadsEnabled } from '../lib/updateSeal
 import { liveCandidateDecisionPath, liveCandidateReviewPath, livePackagePath } from '../lib/registrationValidation';
 import { logUpdateSealError, toUpdateSealError } from '../lib/updateSealErrors';
 import { EvaluateCandidatePanel } from '../components/candidate/EvaluateCandidatePanel';
+import { TrustBoundaryNotice } from '../components/ui/TrustBoundaryNotice';
 
 export const LiveCandidateDetailPage: React.FC = () => {
   const { publisher = '', packageSlug = '', version = '' } = useParams();
@@ -115,6 +116,7 @@ export const LiveCandidateDetailPage: React.FC = () => {
       </div>
       <section className="bg-brand-cream px-6 lg:px-12 py-10">
         <div className="max-w-[1400px] mx-auto space-y-6">
+          <TrustBoundaryNotice />
           <h1 className="text-3xl font-black uppercase">Candidate record</h1>
           <div className="bg-white border-2 border-brand-charcoal p-6 shadow-[4px_4px_0px_#0B130E] space-y-2 font-mono text-xs">
             <p className="break-all">Candidate ID: {record.candidate_id}</p>

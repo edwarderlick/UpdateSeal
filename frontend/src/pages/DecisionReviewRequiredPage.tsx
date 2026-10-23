@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AlertTriangle, Clock, ShieldAlert, CheckCircle2, XCircle } from 'lucide-react';
+import { DesignDemoBanner } from '../components/ui/DesignDemoBanner';
 
 export const DecisionReviewRequiredPage: React.FC = () => {
   const [multisigFeedback, setMultisigFeedback] = useState<string | null>(null);
@@ -16,6 +17,7 @@ export const DecisionReviewRequiredPage: React.FC = () => {
 
   return (
     <div className="flex flex-col w-full pb-16">
+      <DesignDemoBanner />
       {/* Top Breadcrumb Bar */}
       <div className="w-full bg-brand-cream border-b-2 border-brand-charcoal px-4 sm:px-8 lg:px-12 py-3">
         <div className="max-w-[1440px] mx-auto flex flex-wrap items-center justify-between gap-3 text-brand-charcoal font-mono text-xs">
@@ -71,13 +73,13 @@ export const DecisionReviewRequiredPage: React.FC = () => {
               HUMAN INTERLOCK REQUIRED: CAPABILITY EXPANSION DETECTED
             </h1>
             <p className="text-base lg:text-lg text-brand-charcoal mt-4 max-w-3xl font-medium leading-relaxed">
-              GenLayer LLM Evaluators reached 4/5 consensus that candidate introduces new external endpoints not covered under frozen charter v1.4. Automated self-deployment is halted under multisig safeguard rules.
+              Illustrative GenLayer evaluator copy: the evidence does not support a confident approval or a clear violation. REVIEW_REQUIRED signals that external operators should pause and review. UpdateSeal v1 does not halt external deployment or run an on-chain multisig.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-4 pt-2">
             <div className="bg-brand-forest text-white px-4 py-1.5 text-xs font-mono font-bold uppercase tracking-wider border border-brand-charcoal shadow-[2px_2px_0px_#0B130E]">
-              STATUS: AWAITING MULTISIG EPOCH 19
+              DEMO STATE: HUMAN REVIEW CONCEPT
             </div>
             <div className="text-xs font-mono font-bold text-brand-charcoal flex items-center gap-1.5 bg-white/80 px-3 py-1 border border-brand-charcoal">
               <Clock className="w-3.5 h-3.5 text-brand-orange" />
@@ -133,7 +135,7 @@ export const DecisionReviewRequiredPage: React.FC = () => {
                 <Clock className="w-5 h-5 text-brand-charcoal" />
               </div>
               <div>
-                <div className="font-mono text-xs uppercase tracking-wider text-stone-800 font-bold mb-1">MULTISIG WINDOW</div>
+                <div className="font-mono text-xs uppercase tracking-wider text-stone-800 font-bold mb-1">REVIEW WINDOW (DEMO)</div>
                 <div className="text-2xl font-black text-brand-charcoal uppercase tracking-tight">47h 12m</div>
                 <div className="text-sm text-stone-900 mt-1 font-bold">Purge triggered upon expiry</div>
               </div>
@@ -274,7 +276,7 @@ export const DecisionReviewRequiredPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Multisig Sign-off Console */}
+      {/* Illustrative Human Review Console */}
       <section className="w-full bg-brand-cream border-b-2 border-brand-charcoal px-4 sm:px-8 lg:px-16 py-12">
         <div className="max-w-[1440px] mx-auto flex flex-col gap-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b-2 border-brand-charcoal">
@@ -283,11 +285,11 @@ export const DecisionReviewRequiredPage: React.FC = () => {
                 SECTION 02 // GOVERNANCE INTERACTION
               </span>
               <h2 className="text-2xl lg:text-3xl uppercase text-brand-forest font-black tracking-tight">
-                Multisig Sign-off Console
+                Illustrative Human Review Console
               </h2>
             </div>
             <div className="bg-brand-forest text-brand-pastelYellow px-4 py-1.5 font-mono text-xs font-bold uppercase tracking-wider border-2 border-brand-charcoal shadow-[3px_3px_0px_#0B130E]">
-              Threshold Rule: 2-of-3 Human Guardians Required
+              Design demo: human review occurs outside this contract
             </div>
           </div>
 
@@ -339,7 +341,7 @@ export const DecisionReviewRequiredPage: React.FC = () => {
                 </div>
                 <div>
                   <div className="font-mono text-lg text-stone-700 font-bold">0x19a2...99C1</div>
-                  <div className="text-xs text-stone-600 mt-1 font-medium">Protocol Council Multisig Node</div>
+                  <div className="text-xs text-stone-600 mt-1 font-medium">Protocol Council Reviewer (illustrative)</div>
                 </div>
                 <div className="mt-4 pt-3 border-t border-stone-200 font-mono text-[11px] text-stone-500">
                   Standing by for Guardian 02 action.
@@ -354,7 +356,7 @@ export const DecisionReviewRequiredPage: React.FC = () => {
                   Execute Consensus State Transition
                 </h4>
                 <p className="text-xs text-stone-700 leading-relaxed font-medium">
-                  Confirming will ratify Charter Addendum v1.4.1 allowing <code className="font-mono text-xs bg-white border border-brand-charcoal px-1.5 py-0.5 text-brand-forest font-bold">api.semantic-scholar.org</code> and unblock package distribution. Rejecting sets verdict permanently to <strong className="text-brand-orange font-black">0x03 VIOLATION</strong>. UpdateSeal v1 does not implement slashing.
+                  These buttons are local simulations only. They do not submit a transaction, request a wallet signature, or change on-chain state. External systems would need to consume a live REVIEW_REQUIRED verdict; this screen is illustrative.
                 </p>
               </div>
 
@@ -365,14 +367,14 @@ export const DecisionReviewRequiredPage: React.FC = () => {
                     className="w-full sm:w-auto px-6 py-3.5 bg-brand-charcoal text-white hover:bg-stone-800 transition-colors font-mono text-xs uppercase font-black tracking-wider border-2 border-brand-charcoal shadow-[3px_3px_0px_#EF5313] flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <XCircle className="w-4 h-4 text-brand-orange" />
-                    <span>REJECT CANDIDATE (0x03)</span>
+                    <span>SIMULATE REJECT (0x03)</span>
                   </button>
 
                   <button
                     onClick={() => handleMultisig('approve')}
                     className="w-full sm:w-auto px-8 py-3.5 bg-brand-orange text-white hover:bg-brand-orangeDark transition-colors font-mono text-xs uppercase font-black tracking-wider border-2 border-brand-charcoal shadow-[3px_3px_0px_#0B130E] flex items-center justify-center gap-2 cursor-pointer"
                   >
-                    <span>SIGN TO APPROVE EXPANSION (2-OF-3) ✍️</span>
+                    <span>SIMULATE APPROVE EXPANSION</span>
                   </button>
                 </div>
               ) : null}
