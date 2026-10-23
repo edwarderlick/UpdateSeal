@@ -22,12 +22,13 @@ UpdateSeal is a decentralized release approval registry for autonomous AI agents
 | Published baseline commit | `b5d498fa08949e1e0f5113fb2f9d154368dfa97c` (`main`) |
 | Erroneous legacy smoke package | `0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal-v2-e2e` (immutable; points at Provider-Court; do not use for UpdateSeal candidates) |
 | Controlled v2 candidate | `0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal@0.1.0-v2-smoke` — **APPROVED** |
+| Frontend evaluation smoke | `0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal@0.2.0-frontend-eval-smoke` — **REVIEW_REQUIRED** |
 
 The official project repository is `https://github.com/edwarderlick/UpdateSeal`. Provider-Court is a separate GenLayer project. An earlier Studio-dev smoke registration (`updateseal-v2-e2e`) incorrectly used Provider-Court as its repository URL. That on-chain package cannot be edited or deleted and may still appear in public registry enumeration. Evidence Schema v2 candidates must use the `updateseal` package and the published UpdateSeal baseline.
 
 Studio-dev is a preview environment and may reset. Do not treat a Studio-dev address as durable mainnet state.
 
-Write methods used by the frontend: `register_package`, `submit_candidate`, `evaluate_candidate`. Browser wallets must be passed to GenLayerJS as a Viem JSON-RPC Account object. Address strings remain the public identity used in snapshots, comparisons, and the UI. A failure before a transaction hash exists is not a contract rejection. The controlled frontend candidate smoke transaction is still pending.
+Write methods used by the frontend: `register_package`, `submit_candidate`, `evaluate_candidate`. Browser wallets must be passed to GenLayerJS as a Viem JSON-RPC Account object. Address strings remain the public identity used in snapshots, comparisons, and the UI. A failure before a transaction hash exists is not a contract rejection. The controlled frontend evaluation smoke used the production wizard for `submit_candidate` (`0xd07fbb240ee0e13eaa331bbadf55b50ecf0d0257a6a2cc4e8aaa22509e346fa1`) and the live candidate record for `evaluate_candidate` (`0xf4ee1038144c9e917e693149a09103d8322b3896cd888c7a06518ce9bbbf19e7`). The resulting on-chain status is **REVIEW_REQUIRED**. Studio-dev is a preview environment and may reset.
 
 ### Public read architecture
 
@@ -231,12 +232,12 @@ The active Studio-dev contract at `0xCdf0410A2883c27983d5C3062E40F88dfc83c5E3` e
 
 The UI estimates the exact `evaluate_candidate` fee, requires an explicit **Request Evaluation** click, re-reads the candidate immediately before `writeContract`, stores an immutable public transaction snapshot, classifies the GenLayer receipt with `isSuccessful`, and verifies the finalized `get_candidate` / `get_package` read-back including the canonical decision hash. **Check Existing Transaction** only waits on that hash and never submits again.
 
-Frontend duplicate protection (PENDING and EVIDENCE_UNAVAILABLE eligibility, freshness checks, one write per confirmation, local unresolved snapshot) reduces accidental double requests. Retries are never automatic. **Check Existing Transaction** never writes. Frontend checks cannot eliminate races from another wallet or browser. The existing approved candidate `…/updateseal@0.1.0-v2-smoke` must not be evaluated again. Studio-dev is a preview network and may reset.
+Frontend duplicate protection (PENDING and EVIDENCE_UNAVAILABLE eligibility, freshness checks, one write per confirmation, local unresolved snapshot) reduces accidental double requests. Retries are never automatic. **Check Existing Transaction** never writes. Frontend checks cannot eliminate races from another wallet or browser. The existing approved candidate `…/updateseal@0.1.0-v2-smoke` must not be evaluated again. The frontend evaluation smoke candidate `…/updateseal@0.2.0-frontend-eval-smoke` is on-chain **REVIEW_REQUIRED** after one evaluation attempt and must not be evaluated again. Studio-dev is a preview network and may reset.
 
 ## Remaining product areas
 
 1. Live multi-validator review progress is not simulated from on-chain events; completed live candidates open the decision report.
 2. GitHub repository ownership is still unproven.
 3. Studio-dev preview state may reset.
-4. A separate controlled smoke test of a real PENDING candidate evaluation is still required. The existing APPROVED candidate must not be re-evaluated. No on-chain candidate transaction has succeeded for `0.2.0-frontend-eval-smoke`.
+4. The controlled frontend evaluation smoke for `0.2.0-frontend-eval-smoke` completed through the production UI. On-chain status is **REVIEW_REQUIRED**. That candidate and the earlier APPROVED `0.1.0-v2-smoke` candidate must not be evaluated again.
 

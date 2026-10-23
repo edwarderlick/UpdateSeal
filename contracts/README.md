@@ -11,7 +11,8 @@
 > - Active application package: `0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal` (baseline `b5d498fa08949e1e0f5113fb2f9d154368dfa97c`).
 > - The earlier smoke package `0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal-v2-e2e` incorrectly points at Provider-Court. It is immutable on-chain and must not be used for UpdateSeal candidates.
 > - Controlled candidate `0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal@0.1.0-v2-smoke` is on-chain **APPROVED** after one `evaluate_candidate` transaction.
-> - `submit_candidate` and `evaluate_candidate` remain separate transactions. The frontend writes `evaluate_candidate` for **PENDING** (initial) and **EVIDENCE_UNAVAILABLE** (explicit paid retry). **APPROVED**, **REVIEW_REQUIRED**, and **VIOLATION** are terminal. The existing APPROVED smoke candidate must not be evaluated again.
+> - Controlled frontend evaluation smoke candidate `0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal@0.2.0-frontend-eval-smoke` is on-chain **REVIEW_REQUIRED** after one production-frontend `submit_candidate` (`0xd07fbb240ee0e13eaa331bbadf55b50ecf0d0257a6a2cc4e8aaa22509e346fa1`) and one production-frontend `evaluate_candidate` (`0xf4ee1038144c9e917e693149a09103d8322b3896cd888c7a06518ce9bbbf19e7`).
+> - `submit_candidate` and `evaluate_candidate` remain separate transactions. The frontend writes `evaluate_candidate` for **PENDING** (initial) and **EVIDENCE_UNAVAILABLE** (explicit paid retry). **APPROVED**, **REVIEW_REQUIRED**, and **VIOLATION** are terminal. The existing APPROVED and REVIEW_REQUIRED smoke candidates must not be evaluated again.
 > - No funds are custodied, and no escrow, bonds, or slashing mechanics exist in this contract.
 
 Wallet registration proves which address registered the package. It does not prove ownership of the referenced GitHub repository. Repository ownership verification remains deferred.

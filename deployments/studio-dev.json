@@ -49,7 +49,9 @@
     "smokeTestTransactionUrl": "https://explorer-studio-dev.genlayer.com/tx/0x23686eed1d58c899d0da855ef044b3b2e9730c23530e6832d8e87ce600a9a312",
     "applicationPackageTransactionUrl": "https://explorer-studio-dev.genlayer.com/tx/0x2218c81a9a3e3f1e1dfb02234121611f808512c254e9bcf47a895628cea07ae0",
     "candidateSmokeTestTransactionUrl": "https://explorer-studio-dev.genlayer.com/tx/0x5545e2fbb76c8265b20b4fa03819ed1eeeb81f709171fd2cd860c4435e01a416",
-    "candidateEvaluationTransactionUrl": "https://explorer-studio-dev.genlayer.com/tx/0x0f911b652d9b66451ddafdb0aaf733acdb81542b4125376721d87c1f470cb408"
+    "candidateEvaluationTransactionUrl": "https://explorer-studio-dev.genlayer.com/tx/0x0f911b652d9b66451ddafdb0aaf733acdb81542b4125376721d87c1f470cb408",
+    "frontendEvalSmokeSubmitTransactionUrl": "https://explorer-studio-dev.genlayer.com/tx/0xd07fbb240ee0e13eaa331bbadf55b50ecf0d0257a6a2cc4e8aaa22509e346fa1",
+    "frontendEvalSmokeEvaluationTransactionUrl": "https://explorer-studio-dev.genlayer.com/tx/0xf4ee1038144c9e917e693149a09103d8322b3896cd888c7a06518ce9bbbf19e7"
   },
   "officialRepositoryUrl": "https://github.com/edwarderlick/UpdateSeal",
   "applicationPackage": {
@@ -66,7 +68,7 @@
     "finalized": true,
     "sequence": 1,
     "packageCount": 2,
-    "candidateCount": 1,
+    "candidateCount": 2,
     "readBackVerified": true,
     "candidateSubmitted": true,
     "evaluateCandidateCalled": true,
@@ -102,7 +104,43 @@
     "evaluatedAtUtc": "2026-10-22T09:21:58Z",
     "decisionHashVerified": true,
     "evidenceRecheckedAfterEvaluation": true,
-    "note": "Controlled Evidence Schema v2 candidate against the correct UpdateSeal package. On-chain status is APPROVED after one evaluate_candidate transaction. evaluate_candidate remains unwired in the frontend."
+    "note": "Controlled Evidence Schema v2 candidate against the correct UpdateSeal package. On-chain status is APPROVED after one evaluate_candidate transaction. At the time of this 0.1.0-v2-smoke write, evaluate_candidate was not yet wired into the frontend."
+  },
+  "frontendEvalSmokeTest": {
+    "packageUid": "0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal",
+    "version": "0.2.0-frontend-eval-smoke",
+    "candidateId": "0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal@0.2.0-frontend-eval-smoke",
+    "branch": "updateseal-frontend-eval-smoke",
+    "candidateCommitSha": "fee557c42e9dab4b8fc4eebd4b6f6482316840c7",
+    "evidenceUri": "https://raw.githubusercontent.com/edwarderlick/UpdateSeal/fee557c42e9dab4b8fc4eebd4b6f6482316840c7/evidence/frontend-eval-smoke-v2.json",
+    "evidenceByteCount": 5066,
+    "evidenceHash": "083ffec8059280df446286de38c35040dd86553c2d47496c6f8c632127c6315c",
+    "submissionFee": "0.000378528000010352 GEN",
+    "candidateTransactionId": "0xd07fbb240ee0e13eaa331bbadf55b50ecf0d0257a6a2cc4e8aaa22509e346fa1",
+    "transactionHash": "0xd07fbb240ee0e13eaa331bbadf55b50ecf0d0257a6a2cc4e8aaa22509e346fa1",
+    "consensusStatus": "FINALIZED",
+    "executionResult": "FINISHED_WITH_RETURN",
+    "finalized": true,
+    "submittedAtUtc": "2026-10-23T05:21:50Z",
+    "evaluationFee": "0.000383778000010352 GEN",
+    "evaluationTransactionId": "0xf4ee1038144c9e917e693149a09103d8322b3896cd888c7a06518ce9bbbf19e7",
+    "evaluationConsensusStatus": "FINALIZED",
+    "evaluationExecutionResult": "FINISHED_WITH_RETURN",
+    "evaluationFinalized": true,
+    "evaluatedAtUtc": "2026-10-23T05:24:45Z",
+    "status": "REVIEW_REQUIRED",
+    "decisionCode": 2,
+    "decisionSummary": "The evidence indicates Evidence Schema v2 preflight and a pinned-SDK test for sender account handling, plus broad frontend and contract test coverage. However, the frozen charter requires commit-pinned Evidence Schema v2, preserved declared package behavior, and no expansion of forbidden capabilities. The supplied information does not clearly establish commit pinning for the evidence schema, does not define the baseline declared package behavior to confirm preservation across the added frontend evaluation/dashboard flows, and does not specify the forbidden capabilities set needed to rule out expansion. Therefore the candidate cannot be conclusively passed or marked as a clear violation from the provided evidence alone.",
+    "findingCodes": ["POLICY_AMBIGUITY"],
+    "evaluationAttempts": 1,
+    "decisionHash": "ce4164ff14a720f33272bcbd8224d0450f4eefaac87cfbc7bc564006d91c783c",
+    "recomputedDecisionHash": "ce4164ff14a720f33272bcbd8224d0450f4eefaac87cfbc7bc564006d91c783c",
+    "decisionHashVerified": true,
+    "evidenceBytesVerified": true,
+    "frontendWritePathUsed": true,
+    "readBackVerified": true,
+    "evaluateCandidateCalled": true,
+    "note": "Controlled frontend write-path smoke: one production submit_candidate and one production evaluate_candidate through the live UI. On-chain status is REVIEW_REQUIRED after one evaluation attempt. The candidate branch updateseal-frontend-eval-smoke remains unmerged. Studio-dev is a preview environment and may reset."
   },
   "erroneousLegacySmokePackage": {
     "annotation": "erroneousLegacySmokePackage",
@@ -152,5 +190,5 @@
     },
     "note": "Legacy Evidence Schema v1 deployment. Do not send Evidence Schema v2 candidates to this address. v1 and v2 evidence documents are incompatible."
   },
-  "note": "Active deployment evaluates Evidence Schema v2 at the unchanged contract address. Official project repository is https://github.com/edwarderlick/UpdateSeal. The correct application package is 0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal. The controlled candidate 0.1.0-v2-smoke is on-chain APPROVED. The earlier updateseal-v2-e2e package remains on-chain as erroneousLegacySmokePackage and was not deleted. Legacy v1 lives under previousDeployment. Studio-dev is a preview environment and may reset. Do not resubmit a transaction solely because receipt polling timed out; resume tracking the saved transaction ID. Candidate submission and evaluation remain separate transactions. evaluate_candidate is not wired into the frontend."
+  "note": "Active deployment evaluates Evidence Schema v2 at the unchanged contract address. Official project repository is https://github.com/edwarderlick/UpdateSeal. The correct application package is 0xb3f7518df619ef485f7a1568ed3705bb6f5b0407/updateseal. The controlled candidate 0.1.0-v2-smoke is on-chain APPROVED. The controlled frontend evaluation smoke candidate 0.2.0-frontend-eval-smoke is on-chain REVIEW_REQUIRED after one frontend submit_candidate and one frontend evaluate_candidate. The earlier updateseal-v2-e2e package remains on-chain as erroneousLegacySmokePackage and was not deleted. Legacy v1 lives under previousDeployment. Studio-dev is a preview environment and may reset. Do not resubmit a transaction solely because receipt polling timed out; resume tracking the saved transaction ID. Candidate submission and evaluation remain separate transactions."
 }
