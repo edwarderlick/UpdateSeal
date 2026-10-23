@@ -1,16 +1,21 @@
 # UpdateSeal — On-chain Release Approval Registry for Autonomous AI Software
 
+[![CI](https://github.com/edwarderlick/UpdateSeal/actions/workflows/ci.yml/badge.svg)](https://github.com/edwarderlick/UpdateSeal/actions/workflows/ci.yml)
+
 UpdateSeal records consensus-backed evaluations of candidate releases against immutable capability charters, helping operators detect and review capability drift before choosing to deploy.
 
 ## Live Proof & Reviewer Quick Links
 
-Live frontend: pending manual Vercel deployment
+Live frontend: [https://update-seal.vercel.app/](https://update-seal.vercel.app/)
+
+Active deployment: Evidence Schema v2 on GenLayer Studio-dev / Studio Next preview (chain ID `61997`) at [`0xCdf0410A2883c27983d5C3062E40F88dfc83c5E3`](https://explorer-studio-dev.genlayer.com/address/0xCdf0410A2883c27983d5C3062E40F88dfc83c5E3). The deployed contract source SHA-256 is `10de3620c1fb37553a7ea013ef87165df5844f05577c8b42a9d29a6736e8fba2`.
 
 ### Project
 
 | Item | Link |
 | :--- | :--- |
 | GitHub repository | [https://github.com/edwarderlick/UpdateSeal](https://github.com/edwarderlick/UpdateSeal) |
+| Live application | [https://update-seal.vercel.app/](https://update-seal.vercel.app/) |
 | Contract source | [contracts/UpdateSealRegistry.py](https://github.com/edwarderlick/UpdateSeal/blob/main/contracts/UpdateSealRegistry.py) |
 | Contract tests | [contracts/tests/test_registry_direct.py](https://github.com/edwarderlick/UpdateSeal/blob/main/contracts/tests/test_registry_direct.py) |
 | Deployment manifest | [deployments/studio-dev.json](https://github.com/edwarderlick/UpdateSeal/blob/main/deployments/studio-dev.json) |

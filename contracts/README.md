@@ -242,7 +242,7 @@ Finding codes are stored as a sorted, unique, canonical compact JSON array.
 3. Snapshots string identities into the nondeterministic block. It does not write storage from leader or validator functions.
 4. Fetches evidence with `gl.nondet.web.request(..., method="GET")`.
 5. Requires HTTP 200, caps the body at 100,000 bytes, hashes the exact raw bytes with SHA-256, compares the digest to the stored lowercase `evidence_hash`, decodes strict UTF-8, and parses JSON.
-6. Validates the evidence v1 schema and stored identities.
+6. Validates Evidence Schema v2 and the stored identities. The legacy v1 deployment remains documented separately and is not compatible with v2 evidence.
 7. Derives deterministic charter findings.
 8. Calls `gl.nondet.exec_prompt(..., response_format="json")` only for `policy_text` assessment when no hard deterministic finding already exists. Charter, diff, paths, and evidence are delimited as untrusted data.
 9. Builds a bounded leader result: `decision_code`, `decision_name`, `finding_codes`, `summary`, `evidence_hash`, `charter_hash`.

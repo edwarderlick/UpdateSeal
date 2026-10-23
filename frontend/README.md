@@ -82,7 +82,9 @@ Live packages are identified by publisher and slug: `/packages/:publisher/:packa
 
 ## Vercel Deployment & Reown AppKit Configuration
 
-When deploying this frontend to Vercel, ensure the following configuration steps are performed:
+Production is live at [https://update-seal.vercel.app/](https://update-seal.vercel.app/). It uses the active Evidence Schema v2 contract at `0xCdf0410A2883c27983d5C3062E40F88dfc83c5E3` on GenLayer Studio-dev (chain ID `61997`). Studio-dev is a preview network and may reset.
+
+For a fresh or replacement Vercel deployment, use the following configuration:
 
 ### 1. Environment Variables in Vercel
 

@@ -1,5 +1,7 @@
 # Deploy UpdateSeal to Vercel
 
+Production is live at [https://update-seal.vercel.app/](https://update-seal.vercel.app/). The instructions below document its reproducible deployment configuration.
+
 Manual GitHub import. Do not put private keys, mnemonics, burner env files, or server secrets in Vercel.
 
 Studio-dev is a preview network and may reset. Do not treat a Studio-dev address as durable mainnet state.
@@ -38,11 +40,11 @@ Never place a private key, mnemonic, burner env, or server secret in Vercel.
 
 ## C. Reown domain allowlist
 
-After Vercel assigns the production domain, add that exact hostname to the Reown project-domain allowlist **if** allowlist enforcement is enabled in the Reown dashboard. If the dashboard does not enforce an allowlist, no extra Reown step is required.
+Add `update-seal.vercel.app` (or the replacement production hostname) to the Reown project-domain allowlist **if** allowlist enforcement is enabled in the Reown dashboard. If the dashboard does not enforce an allowlist, no extra Reown step is required.
 
 ## D. Post-deployment checks
 
-Open the assigned Vercel URL (desktop and 375px). Confirm `LIVE • STUDIO-DEV`, contract `0xCdf0410A2883c27983d5C3062E40F88dfc83c5E3`, no automatic wallet modal, no signature or transaction, and no mock fallback.
+Open [https://update-seal.vercel.app/](https://update-seal.vercel.app/) (desktop and 375px). Confirm `LIVE • STUDIO-DEV`, contract `0xCdf0410A2883c27983d5C3062E40F88dfc83c5E3`, no automatic wallet modal, no signature or transaction, and no mock fallback.
 
 | Route | Expect |
 | :--- | :--- |
