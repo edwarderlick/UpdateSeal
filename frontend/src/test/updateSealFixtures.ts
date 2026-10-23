@@ -3,7 +3,7 @@ import type { OnChainCandidateRecord, OnChainPackageRecord, RegistrySnapshot } f
 export const VALID_LIVE_ENV = {
   VITE_GENLAYER_RPC_URL: 'https://studio-dev.genlayer.com/api',
   VITE_GENLAYER_CHAIN_ID: '61997',
-  VITE_UPDATESEAL_CONTRACT_ADDRESS: '0x6A882db328782051dFf05C40F4C34b3F223cd80A',
+  VITE_UPDATESEAL_CONTRACT_ADDRESS: '0xCdf0410A2883c27983d5C3062E40F88dfc83c5E3',
   VITE_UPDATESEAL_DATA_MODE: 'live',
 };
 

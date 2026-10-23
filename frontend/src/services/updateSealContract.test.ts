@@ -27,7 +27,7 @@ import {
   packageExists,
 } from './updateSealContract';
 
-const CONTRACT = '0x6A882db328782051dFf05C40F4C34b3F223cd80A';
+const CONTRACT = '0xCdf0410A2883c27983d5C3062E40F88dfc83c5E3';
 
 describe('updateSealContract', () => {
   beforeEach(() => {

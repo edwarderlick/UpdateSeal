@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { parseUpdateSealConfig } from './updateSealConfig';
+import {
+  ACTIVE_UPDATESEAL_CONTRACT_ADDRESS,
+  LEGACY_V1_UPDATESEAL_CONTRACT_ADDRESS,
+  parseUpdateSealConfig,
+} from './updateSealConfig';
 import { UpdateSealError } from './updateSealErrors';
 import { VALID_LIVE_ENV } from '../test/updateSealFixtures';
 
@@ -9,9 +13,33 @@ describe('parseUpdateSealConfig', () => {
     expect(config.dataMode).toBe('live');
     expect(config.chainId).toBe(61997);
     expect(config.rpcUrl).toBe('https://studio-dev.genlayer.com/api');
-    expect(config.contractAddress).toBe('0x6A882db328782051dFf05C40F4C34b3F223cd80A');
+    expect(config.contractAddress).toBe(ACTIVE_UPDATESEAL_CONTRACT_ADDRESS);
     expect(config.networkAlias).toBe('studio-dev');
     expect(Object.isFrozen(config)).toBe(true);
+  });
+
+  it('1b. requires the env contract address and never falls back to a hardcoded value', () => {
+    expect(ACTIVE_UPDATESEAL_CONTRACT_ADDRESS).toBe('0xCdf0410A2883c27983d5C3062E40F88dfc83c5E3');
+    expect(LEGACY_V1_UPDATESEAL_CONTRACT_ADDRESS).toBe('0x6A882db328782051dFf05C40F4C34b3F223cd80A');
+    expect(VALID_LIVE_ENV.VITE_UPDATESEAL_CONTRACT_ADDRESS).toBe(ACTIVE_UPDATESEAL_CONTRACT_ADDRESS);
+
+    expect(() =>
+      parseUpdateSealConfig({
+        ...VALID_LIVE_ENV,
+        VITE_UPDATESEAL_CONTRACT_ADDRESS: '',
+      }),
+    ).toThrow(/20-byte/);
+
+    expect(() =>
+      parseUpdateSealConfig({
+        ...VALID_LIVE_ENV,
+        VITE_UPDATESEAL_CONTRACT_ADDRESS: undefined,
+      }),
+    ).toThrow(/20-byte/);
+
+    const missing = { ...VALID_LIVE_ENV };
+    delete (missing as { VITE_UPDATESEAL_CONTRACT_ADDRESS?: string }).VITE_UPDATESEAL_CONTRACT_ADDRESS;
+    expect(() => parseUpdateSealConfig(missing)).toThrow(/20-byte/);
   });
 
   it('2. rejects an invalid contract address', () => {

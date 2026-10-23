@@ -146,14 +146,14 @@ describe('updateSealWrites', () => {
     expect(estimateTransactionFeesForWrite).toHaveBeenCalledTimes(1);
     expect(estimateTransactionFeesForWrite).toHaveBeenCalledWith({
       account: expect.objectContaining({ address: getAddress(SENDER), type: 'json-rpc' }),
-      address: '0x6A882db328782051dFf05C40F4C34b3F223cd80A',
+      address: liveConfig.contractAddress,
       functionName: 'register_package',
       args: writeArgs,
     });
     expect(writeContract).toHaveBeenCalledTimes(1);
     expect(writeContract).toHaveBeenCalledWith({
       account: expect.objectContaining({ address: getAddress(SENDER), type: 'json-rpc' }),
-      address: '0x6A882db328782051dFf05C40F4C34b3F223cd80A',
+      address: liveConfig.contractAddress,
       functionName: 'register_package',
       args: writeArgs,
       fees: {

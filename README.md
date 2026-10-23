@@ -77,6 +77,7 @@ D:\UpdateSeal
 ├── .gitignore
 ├── README.md
 ├── docs
+│   ├── VERCEL_DEPLOYMENT.md
 │   └── design
 │       ├── STITCH_SOURCE_MAP.md
 │       └── DESIGN.md
@@ -202,17 +203,19 @@ npm run build
 
 ---
 
-## Vercel Deployment & Reown AppKit Configuration
+## Deploy to Vercel
 
-When deploying this frontend to Vercel:
+Manual GitHub import. Follow [`docs/VERCEL_DEPLOYMENT.md`](docs/VERCEL_DEPLOYMENT.md).
 
-1. **Vercel Environment Variables:**
-   - Configure `VITE_REOWN_PROJECT_ID` in your Vercel Project Settings (`Settings` -> `Environment Variables`).
-   - Configure public network variables (`VITE_GENLAYER_RPC_URL`, `VITE_GENLAYER_CHAIN_ID=61997`, `VITE_GENLAYER_CHAIN_NAME`, `VITE_GENLAYER_SYMBOL=GEN`, `VITE_GENLAYER_EXPLORER_URL`).
-2. **Reown Allowed Domains:**
-   - The deployed production domain must be added to your Reown project's allowed domains/origins list in the [Reown Cloud Dashboard](https://cloud.reown.com/).
-3. **SPA Routing:**
-   - Single Page Application (SPA) rewrites are automatically configured in `frontend/vercel.json`.
+| Setting | Value |
+| :--- | :--- |
+| Root Directory | `frontend` |
+| Framework | Vite |
+| Install | `npm ci` |
+| Build | `npm run build` |
+| Output | `dist` |
+
+Public `VITE_` environment variables are required. Never put a private key, mnemonic, burner env, or server secret in Vercel. Studio-dev is a preview network and may reset.
 
 ---
 

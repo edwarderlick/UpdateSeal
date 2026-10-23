@@ -72,7 +72,7 @@ export const ConnectWalletModal: React.FC = () => {
                   CONFIGURATION NOTICE: REOWN PROJECT ID NOT SET
                 </span>
                 <p className="text-stone-800 font-medium">
-                  Set <code className="font-mono font-bold bg-white px-1 border border-brand-charcoal">VITE_REOWN_PROJECT_ID</code> in <code className="font-mono">.env.local</code> to enable full public Reown AppKit wallet features.
+                  Set <code className="font-mono font-bold bg-white px-1 border border-brand-charcoal">VITE_REOWN_PROJECT_ID</code> in the public frontend environment to enable full public Reown AppKit wallet features.
                 </p>
               </div>
             </div>
@@ -157,7 +157,7 @@ export const ConnectWalletModal: React.FC = () => {
                 <p className="text-xs font-medium text-stone-800 leading-relaxed font-sans">
                   {isProjectConfigured
                     ? 'Connect via QR code with Rainbow, MetaMask Mobile, Safe multisig, or 300+ mobile wallets.'
-                    : 'WalletConnect QR pairing is disabled until VITE_REOWN_PROJECT_ID is configured in .env.local.'}
+                    : 'WalletConnect QR pairing is disabled until VITE_REOWN_PROJECT_ID is configured in the public frontend environment.'}
                 </p>
               </div>
               <div className="flex items-center justify-between pt-2 border-t border-brand-charcoal/30 bg-black/5 px-2.5 py-1.5 border border-brand-charcoal">

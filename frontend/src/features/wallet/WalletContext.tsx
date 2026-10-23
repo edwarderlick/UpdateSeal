@@ -132,7 +132,7 @@ const InnerWalletProvider: React.FC<InnerWalletProviderProps> = ({
     } else {
       // Injected-only mode when Reown project ID is unconfigured
       if (providerId === 'WalletConnect') {
-        setErrorMessage('WalletConnect and QR login are unavailable because VITE_REOWN_PROJECT_ID is not configured. Please use an installed browser wallet or set VITE_REOWN_PROJECT_ID in .env.local.');
+        setErrorMessage('WalletConnect and QR login are unavailable because VITE_REOWN_PROJECT_ID is not configured. Please use an installed browser wallet or set VITE_REOWN_PROJECT_ID in the public frontend environment.');
         return;
       }
 
@@ -149,7 +149,7 @@ const InnerWalletProvider: React.FC<InnerWalletProviderProps> = ({
           await connectAsync({ connector: injectedConnector });
           setIsWalletModalOpen(false);
         } else {
-          setErrorMessage('No browser wallet detected. Please install MetaMask, Rabby, or configure VITE_REOWN_PROJECT_ID in .env.local.');
+          setErrorMessage('No browser wallet detected. Please install MetaMask, Rabby, or configure VITE_REOWN_PROJECT_ID in the public frontend environment.');
         }
       } catch (err: any) {
         if (err?.code === 4001 || err?.message?.includes('User rejected')) {

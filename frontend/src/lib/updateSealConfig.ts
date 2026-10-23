@@ -3,7 +3,14 @@ import { UpdateSealError } from './updateSealErrors';
 export const STUDIO_DEV_CHAIN_ID = 61997;
 export const STUDIO_DEV_RPC_HOST = 'studio-dev.genlayer.com';
 export const CANONICAL_STUDIO_DEV_RPC_URL = 'https://studio-dev.genlayer.com/api';
-export const UPDATESEAL_CONTRACT_ADDRESS = '0x6A882db328782051dFf05C40F4C34b3F223cd80A';
+
+/** Active Evidence Schema v2 Studio-dev contract. Runtime still requires VITE_UPDATESEAL_CONTRACT_ADDRESS. */
+export const ACTIVE_UPDATESEAL_CONTRACT_ADDRESS =
+  '0xCdf0410A2883c27983d5C3062E40F88dfc83c5E3';
+
+/** Legacy Evidence Schema v1 Studio-dev contract. Do not use as the active address. */
+export const LEGACY_V1_UPDATESEAL_CONTRACT_ADDRESS =
+  '0x6A882db328782051dFf05C40F4C34b3F223cd80A';
 
 export type UpdateSealDataMode = 'live' | 'demo';
 
