@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Filter } from 'lucide-react';
 import { DataModeBadge } from '../components/ui/DataModeBadge';
@@ -27,6 +27,7 @@ import {
 } from '../lib/registrationValidation';
 import { isCompletedVerdictStatus } from '../lib/decisionReport';
 import { parsePackageUid } from '../lib/candidateId';
+import { STUDIO_DEV_RPC_UNAVAILABLE_MESSAGE } from '../lib/updateSealErrors';
 
 const FILTERS: { id: ActivityFilter; label: string }[] = [
   { id: 'all', label: 'All' },
@@ -52,6 +53,7 @@ export const LiveActivityPage: React.FC = () => {
   const [changedNotice, setChangedNotice] = useState(false);
   const [filter, setFilter] = useState<ActivityFilter>('all');
   const [search, setSearch] = useState('');
+  const retryInFlightRef = useRef(false);
 
   const packagesQuery = useLivePackagePages(true, epoch);
   const candidatesQuery = useLiveCandidatePages(true, epoch);
@@ -81,11 +83,16 @@ export const LiveActivityPage: React.FC = () => {
 
   const packageScan = scannedRange(packagesQuery.data?.pages ?? []);
   const candidateScan = scannedRange(candidatesQuery.data?.pages ?? []);
-  const packageTotal = packagesQuery.data?.pages[0]?.totalCount ?? 0;
-  const candidateTotal = candidatesQuery.data?.pages[0]?.totalCount ?? 0;
-  const packagesComplete = Boolean(packagesQuery.data) && !packagesQuery.hasNextPage;
-  const candidatesComplete = Boolean(candidatesQuery.data) && !candidatesQuery.hasNextPage;
-  const incomplete = !packagesComplete || !candidatesComplete;
+  const packageTotal = packagesQuery.data?.pages[0]?.totalCount;
+  const candidateTotal = candidatesQuery.data?.pages[0]?.totalCount;
+  const hasConfirmedSnapshot = packagesQuery.data !== undefined && candidatesQuery.data !== undefined;
+  const snapshotSettled = !packagesQuery.isPending && !candidatesQuery.isPending;
+  const snapshotReadFailed = snapshotSettled && (packagesQuery.isError || candidatesQuery.isError);
+  const hideUnconfirmedSnapshot = snapshotReadFailed && !hasConfirmedSnapshot;
+  const packagesReadSucceeded = packagesQuery.isSuccess || (hasConfirmedSnapshot && !packagesQuery.isError);
+  const packagesComplete = packagesReadSucceeded && Boolean(packagesQuery.data) && !packagesQuery.hasNextPage;
+  const candidatesComplete = Boolean(candidatesQuery.data) && !candidatesQuery.hasNextPage && !candidatesQuery.isError;
+  const incomplete = !hideUnconfirmedSnapshot && (!packagesComplete || !candidatesComplete);
 
   const visiblePackages = useMemo(() => {
     if (filter !== 'all' && filter !== 'packages') {
@@ -109,9 +116,22 @@ export const LiveActivityPage: React.FC = () => {
     });
   }, [candidates, filter, search]);
 
-  const loadingInitial = packagesQuery.isLoading || candidatesQuery.isLoading;
-  const showPackages = filter === 'all' || filter === 'packages';
-  const showCandidates = filter !== 'packages';
+  const loadingInitial = !hasConfirmedSnapshot && (packagesQuery.isPending || candidatesQuery.isPending);
+  const showPackages = !hideUnconfirmedSnapshot && (filter === 'all' || filter === 'packages');
+  const showCandidates = !hideUnconfirmedSnapshot && filter !== 'packages';
+
+  const retryReads = async () => {
+    if (retryInFlightRef.current) {
+      return;
+    }
+    retryInFlightRef.current = true;
+    try {
+      await packagesQuery.refetch();
+      await candidatesQuery.refetch();
+    } finally {
+      retryInFlightRef.current = false;
+    }
+  };
 
   return (
     <div className="flex flex-col w-full pb-16" data-testid="live-activity-page">
@@ -125,23 +145,25 @@ export const LiveActivityPage: React.FC = () => {
             This is a current contract registry snapshot. Entries are ordered by their individual package or candidate
             registry indexes; the contract does not expose timestamps or a unified event stream.
           </p>
-          <p className="font-mono text-xs text-stone-300">
-            package_count {packageTotal} • candidate_count {candidateTotal} • Studio-dev preview may reset
-          </p>
+          {hasConfirmedSnapshot && packageTotal !== undefined && candidateTotal !== undefined ? (
+            <p className="font-mono text-xs text-stone-300" data-testid="activity-snapshot-counts">
+              package_count {packageTotal} • candidate_count {candidateTotal} • Studio-dev preview may reset
+            </p>
+          ) : null}
         </div>
       </section>
 
       <main className="w-full max-w-[1440px] mx-auto px-4 lg:px-12 py-10 space-y-8">
         <RegistryChangedNotice visible={changedNotice} />
 
-        {packagesQuery.error || candidatesQuery.error ? (
+        {snapshotReadFailed ? (
           <NetworkErrorPanel
             error={packagesQuery.error ?? candidatesQuery.error}
             onRetry={() => {
-              void packagesQuery.refetch();
-              void candidatesQuery.refetch();
+              void retryReads();
             }}
             testId="activity-network-error"
+            message={STUDIO_DEV_RPC_UNAVAILABLE_MESSAGE}
           />
         ) : null}
 
@@ -194,7 +216,7 @@ export const LiveActivityPage: React.FC = () => {
           </div>
         ) : null}
 
-        {!loadingInitial && visiblePackages.length === 0 && visibleCandidates.length === 0 && !packagesQuery.error ? (
+        {!loadingInitial && !hideUnconfirmedSnapshot && visiblePackages.length === 0 && visibleCandidates.length === 0 && !snapshotReadFailed ? (
           <div className="bg-white border-2 border-brand-charcoal p-10" data-testid="activity-empty">
             <p className="font-mono text-xs font-bold uppercase">No loaded records match this filter.</p>
           </div>
@@ -249,6 +271,7 @@ export const LiveActivityPage: React.FC = () => {
                   item={item}
                   packageKnown={packageIds.has(item.associatedPackageUid)}
                   packagesComplete={packagesComplete}
+                  packagesReadSucceeded={packagesReadSucceeded}
                 />
               ),
             )}
@@ -266,7 +289,12 @@ export const LiveActivityPage: React.FC = () => {
               void packagesQuery.fetchNextPage();
               void candidatesQuery.fetchNextPage();
             }}
-            disabled={packagesQuery.isFetchingNextPage || candidatesQuery.isFetchingNextPage}
+            disabled={
+              hideUnconfirmedSnapshot ||
+              snapshotReadFailed ||
+              packagesQuery.isFetchingNextPage ||
+              candidatesQuery.isFetchingNextPage
+            }
             complete={packagesComplete && candidatesComplete}
           />
         </div>
@@ -314,10 +342,12 @@ function CandidateActivityCard({
   item,
   packageKnown,
   packagesComplete,
+  packagesReadSucceeded,
 }: {
   item: Extract<IndexedCandidate, { kind: 'ok' }>;
   packageKnown: boolean;
   packagesComplete: boolean;
+  packagesReadSucceeded: boolean;
 }) {
   const decided = isCompletedVerdictStatus(item.record.status);
   const activityType = decided ? 'CANDIDATE DECIDED' : 'CANDIDATE SUBMITTED';
@@ -338,7 +368,7 @@ function CandidateActivityCard({
           Status: {item.record.status}
         </span>
       </div>
-      {!packageKnown ? (
+      {!packageKnown && packagesReadSucceeded ? (
         <p className="text-xs font-bold" data-testid="unknown-package-warning" role="status">
           {packagesComplete
             ? 'Integrity warning: this candidate package UID was not found among scanned packages.'

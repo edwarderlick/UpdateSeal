@@ -62,6 +62,49 @@ describe('reviewer claim alignment', () => {
     expect(screen.queryByText(/machine-enforceable decision/i)).not.toBeInTheDocument();
   });
 
+  it('landing page does not claim git-diff reconstruction, filesystem enforcement, stored signatures, or never-guarantees', () => {
+    renderPage(<LandingPage />);
+    const body = document.body.textContent ?? '';
+    expect(body).not.toMatch(/ingest the Git diff/i);
+    expect(body).not.toMatch(/reconstruct the actual Git diff/i);
+    expect(body).not.toMatch(/IPFS tree hash/i);
+    expect(body).not.toMatch(/Filesystem Sandboxing/i);
+    expect(body).not.toMatch(/Directory jail/i);
+    expect(body).not.toMatch(/individual node signatures/i);
+    expect(body).not.toMatch(/will never undergo/i);
+    expect(body).toMatch(/Every submitted candidate may be evaluated against its frozen charter/);
+    expect(body).toMatch(/The contract evaluates bounded, commit-pinned, content-hashed Evidence Schema v2/);
+    expect(body).toMatch(/The stored result contains the consensus-backed status, findings, evaluation attempts, and decision hash/);
+    expect(body).toMatch(/A verdict provides auditable evidence for downstream release policy/);
+  });
+
+  it('landing illustrative workflow and metrics are labeled as non-live', () => {
+    renderPage(<LandingPage />);
+    expect(screen.getByTestId('illustrative-workflow-label')).toHaveTextContent(
+      'ILLUSTRATIVE WORKFLOW — NOT LIVE CONTRACT DATA',
+    );
+    expect(screen.getByTestId('illustrative-metrics-label')).toHaveTextContent(
+      'ILLUSTRATIVE METRICS — NOT ON-CHAIN COUNTS',
+    );
+    expect(screen.queryByText(/Consensus 98%/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/5 Nodes/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/3\.2s/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Block #61997-402/i)).not.toBeInTheDocument();
+  });
+
+  it('navigation does not display REGISTRY 4 and footer names Charter Schema v1', () => {
+    renderPage(
+      <>
+        <AppHeader />
+        <AppFooter />
+      </>,
+    );
+    expect(screen.queryByText(/REGISTRY 4/i)).not.toBeInTheDocument();
+    expect(screen.getByText('Charter Schema v1')).toBeInTheDocument();
+    expect(screen.queryByText(/Charter v1\.4 Standard/i)).not.toBeInTheDocument();
+    expect(screen.getByText(/© 2026 UpdateSeal Protocol/i)).toBeInTheDocument();
+  });
+
   it('How It Works says external systems may consume the verdict and no on-chain multisig exists', () => {
     renderPage(<HowItWorksPage />);
     expect(screen.getAllByText(/external systems may consume/i).length).toBeGreaterThan(0);

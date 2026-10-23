@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { resetUpdateSealConfigCache } from '../lib/updateSealConfig';
-import { UpdateSealError } from '../lib/updateSealErrors';
+import { STUDIO_DEV_RPC_UNAVAILABLE_MESSAGE, UpdateSealError } from '../lib/updateSealErrors';
 import { OFFICIAL_UPDATESEAL_PACKAGE_UID } from '../lib/registryLabels';
 import type { OnChainCandidateRecord, OnChainPackageRecord } from '../types/updateSeal';
 
@@ -238,5 +238,39 @@ describe('live public activity', () => {
     renderActivity();
     expect(await screen.findByTestId('activity-network-error', {}, { timeout: 8000 })).toBeInTheDocument();
     expect(screen.queryByText(/DEMO ACTIVITY STREAM/i)).not.toBeInTheDocument();
+  });
+
+  it('package read or rate-limit failure fails the snapshot atomically without zero counts or integrity warnings', async () => {
+    getPackage.mockRejectedValue(new UpdateSealError('RPC_UNAVAILABLE', STUDIO_DEV_RPC_UNAVAILABLE_MESSAGE));
+    renderActivity();
+    const notice = await screen.findByTestId('activity-network-error', {}, { timeout: 8000 });
+    expect(notice).toHaveTextContent(STUDIO_DEV_RPC_UNAVAILABLE_MESSAGE);
+    expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument();
+    expect(screen.queryByTestId('activity-snapshot-counts')).not.toBeInTheDocument();
+    expect(screen.queryByText(/package_count 0/i)).not.toBeInTheDocument();
+    expect(screen.queryByTestId('unknown-package-warning')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('integrity-record-card')).not.toBeInTheDocument();
+    expect(screen.queryByText(/associated package is not in the scanned package records yet/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/DEMO ACTIVITY STREAM/i)).not.toBeInTheDocument();
+    expect(screen.queryByTestId('demo-activity-page')).not.toBeInTheDocument();
+  });
+
+  it('Retry repeats registry reads only and never requests wallet access', { timeout: 15000 }, async () => {
+    getPackage.mockRejectedValue(new UpdateSealError('RPC_UNAVAILABLE', STUDIO_DEV_RPC_UNAVAILABLE_MESSAGE));
+    renderActivity();
+    expect(await screen.findByTestId('activity-network-error', {}, { timeout: 8000 })).toBeInTheDocument();
+    const packageCountCalls = getPackageCount.mock.calls.length;
+    const candidateCountCalls = getCandidateCount.mock.calls.length;
+    const packageReadCalls = getPackage.mock.calls.length;
+    fireEvent.click(screen.getByRole('button', { name: /retry/i }));
+    await waitFor(
+      () => {
+        expect(getPackageCount.mock.calls.length).toBeGreaterThan(packageCountCalls);
+        expect(getPackage.mock.calls.length).toBeGreaterThan(packageReadCalls);
+        expect(getCandidateCount.mock.calls.length).toBeGreaterThan(candidateCountCalls);
+      },
+      { timeout: 8000 },
+    );
+    expect(openWalletModal).not.toHaveBeenCalled();
   });
 });

@@ -20,17 +20,19 @@ export function NetworkErrorPanel({
   error,
   onRetry,
   testId,
+  message,
 }: {
   error: unknown;
   onRetry: () => void;
   testId: string;
+  message?: string;
 }) {
   const parsed = toUpdateSealError(error);
   logUpdateSealError(parsed);
   return (
     <div className="bg-white border-2 border-brand-charcoal p-8 space-y-3" data-testid={testId} role="alert">
       <h2 className="text-2xl font-black uppercase">NETWORK/CONFIGURATION ERROR</h2>
-      <p className="text-xs font-mono">{parsed.userMessage}</p>
+      <p className="text-xs font-mono">{message ?? parsed.userMessage}</p>
       <button
         type="button"
         onClick={onRetry}

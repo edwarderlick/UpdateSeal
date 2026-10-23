@@ -277,29 +277,9 @@ async function loadSlice<T extends { id: string | null }>(args: {
   const start = Math.max(0, endExclusive - REGISTRY_PAGE_SIZE);
   const indexes = Array.from({ length: endExclusive - start }, (_, offset) => start + offset);
   const inspected = await mapWithConcurrency(indexes, MAX_READ_CONCURRENCY, async (index) => {
-    try {
-      const id = await args.readAt(index);
-      try {
-        const record = await args.loadRecord(id);
-        return args.inspect(index, id, record as never);
-      } catch (error) {
-        const message = error instanceof Error ? error.message : 'Record could not be loaded.';
-        return {
-          kind: 'integrity',
-          index,
-          id,
-          message,
-        } as unknown as T;
-      }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Registry index could not be read.';
-      return {
-        kind: 'integrity',
-        index,
-        id: null,
-        message,
-      } as unknown as T;
-    }
+    const id = await args.readAt(index);
+    const record = await args.loadRecord(id);
+    return args.inspect(index, id, record as never);
   });
 
   const seen = new Set<string>();

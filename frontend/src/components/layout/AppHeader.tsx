@@ -57,7 +57,7 @@ export const AppHeader: React.FC = () => {
 
   const navLinks = [
     { to: '/', label: 'Overview', icon: Compass },
-    { to: '/registry', label: 'Registry', count: '4', icon: Layers },
+    { to: '/registry', label: 'Registry', icon: Layers },
     { to: '/how-it-works', label: 'How It Works', icon: BookOpen },
     { to: '/verify', label: 'Verify Release', icon: Binary },
     { to: '/activity', label: 'Activity', icon: Activity },
@@ -237,17 +237,6 @@ export const AppHeader: React.FC = () => {
                 >
                   <Icon className="w-3.5 h-3.5" />
                   <span>{link.label}</span>
-                  {link.count && (
-                    <span
-                      className={`px-1 text-[10px] font-mono border ${
-                        active
-                          ? 'bg-brand-pastelYellow text-brand-charcoal border-brand-charcoal'
-                          : 'bg-brand-pastelYellow text-brand-charcoal border-brand-charcoal'
-                      }`}
-                    >
-                      {link.count}
-                    </span>
-                  )}
                 </Link>
               );
             })}
@@ -397,11 +386,6 @@ export const AppHeader: React.FC = () => {
                     <Icon className="w-4 h-4" />
                     <span>{link.label}</span>
                   </span>
-                  {link.count && (
-                    <span className="bg-brand-pastelYellow text-brand-charcoal px-1.5 py-0.5 text-[10px] border border-brand-charcoal">
-                      {link.count}
-                    </span>
-                  )}
                 </Link>
               );
             })}

@@ -64,7 +64,7 @@ export const AppFooter: React.FC = () => {
             <ul className="text-xs space-y-2.5 font-medium">
               <li>
                 <Link to="/how-it-works" className="hover:text-white transition-colors">
-                  Charter v1.4 Standard
+                  Charter Schema v1
                 </Link>
               </li>
               <li>
@@ -109,7 +109,7 @@ export const AppFooter: React.FC = () => {
 
         {/* Massive Editorial Display Watermark */}
         <div className="pt-10 flex flex-col md:flex-row items-center justify-between text-xs font-mono text-stone-500">
-          <div>© 2025 UpdateSeal Protocol. Open-source governance for autonomous systems.</div>
+          <div>© {new Date().getFullYear()} UpdateSeal Protocol. Open-source governance for autonomous systems.</div>
           <div className="mt-4 md:mt-0 flex gap-6">
             <Link to="/how-it-works" className="hover:text-stone-300">
               Terms of Governance

@@ -11,9 +11,6 @@ import {
   HardDrive,
   CheckCheck,
   Terminal,
-  Shield,
-  Layers,
-  Sparkles,
 } from 'lucide-react';
 
 export const LandingPage: React.FC = () => {
@@ -90,7 +87,10 @@ export const LandingPage: React.FC = () => {
 
           {/* Hero Right Column: Graphic Stepped Visual of Agent Verification */}
           <div className="lg:col-span-5 bg-brand-surfaceLight flex flex-col justify-between p-8 stepped-pattern relative">
-            <div className="border-2 border-brand-charcoal bg-white shadow-[4px_4px_0px_#0B130E] p-6 mb-8">
+            <div className="border-2 border-brand-charcoal bg-white shadow-[4px_4px_0px_#0B130E] p-6 mb-8" data-testid="illustrative-workflow">
+              <p className="mb-3 px-2 py-1 bg-brand-pastelYellow text-brand-charcoal text-[10px] font-mono font-bold uppercase tracking-wider border border-brand-charcoal" data-testid="illustrative-workflow-label">
+                ILLUSTRATIVE WORKFLOW — NOT LIVE CONTRACT DATA
+              </p>
               <div className="flex items-center justify-between border-b border-brand-charcoal pb-3 mb-4">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 bg-brand-orange"></div>
@@ -105,7 +105,7 @@ export const LandingPage: React.FC = () => {
 
               {/* Terminal-style Code Block */}
               <div className="bg-brand-charcoal text-stone-200 p-4 font-mono text-xs border border-brand-charcoal leading-relaxed space-y-2">
-                <div className="text-stone-500">// Intercepting release candidate v1.5.0</div>
+                <div className="text-stone-500">// Example consumer query after a stored verdict</div>
                 <div>
                   <span className="text-brand-vibrantCyan">const</span> approved ={' '}
                   <span className="text-brand-pastelYellow">await</span> updateSeal.is_release_approved(
@@ -113,35 +113,35 @@ export const LandingPage: React.FC = () => {
                 <div className="pl-4 text-stone-300">"agent:atlas-deep-research",</div>
                 <div className="pl-4 text-stone-300">"sha256:d9b2e...558a"</div>
                 <div>);</div>
-                <div className="pt-2 text-stone-500">// GenLayer consensus response:</div>
+                <div className="pt-2 text-stone-500">// Illustrative stored result:</div>
                 <div className="p-2 bg-stone-900 border border-stone-800 text-emerald-400 flex items-center justify-between">
-                  <span>Verdict: APPROVED (Consensus 98%)</span>
-                  <span className="text-stone-400 text-[10px]">Block #61997-402</span>
+                  <span>Verdict: APPROVED</span>
+                  <span className="text-stone-400 text-[10px]">consensus-backed status</span>
                 </div>
               </div>
 
               <div className="mt-4 flex items-center justify-between text-xs text-stone-600 font-mono">
                 <span>Target: Atlas Deep Research</span>
-                <span className="font-bold text-brand-orange">No Scope Escalation</span>
+                <span className="font-bold text-brand-orange">Charter-bound example</span>
               </div>
             </div>
 
             {/* Stepped Mosaic Blocks */}
             <div className="grid grid-cols-3 gap-3">
               <div className="bg-brand-pastelYellow border-2 border-brand-charcoal p-3 shadow-[2px_2px_0px_#0B130E]">
-                <div className="text-[10px] font-mono text-stone-700 uppercase font-bold">Immutable</div>
-                <div className="text-xl font-black mt-1 text-brand-charcoal font-sans">100%</div>
-                <div className="text-[11px] leading-tight text-stone-800 mt-1 font-medium">On-chain state tracking</div>
+                <div className="text-[10px] font-mono text-stone-700 uppercase font-bold">Evidence</div>
+                <div className="text-xl font-black mt-1 text-brand-charcoal font-sans">Schema v2</div>
+                <div className="text-[11px] leading-tight text-stone-800 mt-1 font-medium">Commit-pinned document</div>
               </div>
               <div className="bg-brand-pastelPink border-2 border-brand-charcoal p-3 shadow-[2px_2px_0px_#0B130E]">
-                <div className="text-[10px] font-mono text-stone-700 uppercase font-bold">Validators</div>
-                <div className="text-xl font-black mt-1 text-brand-charcoal font-sans">5 Nodes</div>
-                <div className="text-[11px] leading-tight text-stone-800 mt-1 font-medium">LLM-native consensus</div>
+                <div className="text-[10px] font-mono text-stone-700 uppercase font-bold">Charter</div>
+                <div className="text-xl font-black mt-1 text-brand-charcoal font-sans">Schema v1</div>
+                <div className="text-[11px] leading-tight text-stone-800 mt-1 font-medium">Frozen capability baseline</div>
               </div>
               <div className="bg-brand-vibrantCyan border-2 border-brand-charcoal p-3 shadow-[2px_2px_0px_#0B130E]">
-                <div className="text-[10px] font-mono text-stone-700 uppercase font-bold">Latency</div>
-                <div className="text-xl font-black mt-1 text-brand-charcoal font-sans">&lt; 3.2s</div>
-                <div className="text-[11px] leading-tight text-stone-800 mt-1 font-medium">Deterministic query</div>
+                <div className="text-[10px] font-mono text-stone-700 uppercase font-bold">Network</div>
+                <div className="text-xl font-black mt-1 text-brand-charcoal font-sans">Studio-dev</div>
+                <div className="text-[11px] leading-tight text-stone-800 mt-1 font-medium">Preview network may reset</div>
               </div>
             </div>
           </div>
@@ -149,7 +149,12 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* EDITORIAL METRICS BAR */}
-      <section className="bg-brand-cream border-b-2 border-brand-charcoal" data-purpose="metrics-strip">
+      <section className="bg-brand-cream border-b-2 border-brand-charcoal" data-purpose="metrics-strip" data-testid="illustrative-metrics">
+        <div className="max-w-[1440px] mx-auto px-6 lg:px-16 pt-4">
+          <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-stone-700" data-testid="illustrative-metrics-label">
+            ILLUSTRATIVE METRICS — NOT ON-CHAIN COUNTS
+          </p>
+        </div>
         <div className="max-w-[1440px] mx-auto grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x-2 divide-brand-charcoal font-mono">
           <div className="p-8">
             <span className="block text-4xl sm:text-5xl font-black text-brand-charcoal tracking-tight font-sans">142+</span>
@@ -187,7 +192,7 @@ export const LandingPage: React.FC = () => {
                 In the emerging autonomous software ecosystem, agents autonomously pull plugins, fetch updated weights, and invoke dynamic APIs. If a release secretly expands network scopes, requests new private file system privileges, or alters safety prompt baselines, host orchestrators are blind until funds or credentials leak.
               </p>
               <p className="font-medium text-white border-l-2 border-brand-pastelYellow pl-4">
-                UpdateSeal introduces <span className="text-brand-pastelYellow font-bold">Charter-Bound Releases</span>: immutable on-chain declarations specifying exactly what an agent can and cannot do. Every new version commit is evaluated by GenLayer consensus before an operator chooses to deploy.
+                UpdateSeal introduces <span className="text-brand-pastelYellow font-bold">Charter-Bound Releases</span>: on-chain declarations specifying what an agent is allowed to do. Every submitted candidate may be evaluated against its frozen charter.
               </p>
             </div>
           </div>
@@ -265,7 +270,7 @@ export const LandingPage: React.FC = () => {
                 </div>
                 <h3 className="text-xl font-bold uppercase tracking-tight mb-2 font-sans">System Prompt Drift</h3>
                 <p className="text-xs text-stone-800 leading-normal">
-                  GenLayer Intelligent contracts ingest the Git diff and semantic diff the system prompt to detect stealth alignment jailbreaks.
+                  The contract evaluates bounded, commit-pinned, content-hashed Evidence Schema v2. It does not independently fetch or reconstruct the full Git diff. The evidence document contains submitter-authored diff_summary, changed_files, capabilities, domains, evidence items, and tests.
                 </p>
               </div>
               <div className="mt-6 pt-4 border-t border-stone-800 flex items-center justify-between text-[11px] font-mono">
@@ -283,14 +288,14 @@ export const LandingPage: React.FC = () => {
                     <HardDrive className="w-4 h-4" />
                   </div>
                 </div>
-                <h3 className="text-xl font-bold uppercase tracking-tight mb-2 font-sans">Filesystem Sandboxing</h3>
+                <h3 className="text-xl font-bold uppercase tracking-tight mb-2 font-sans">Filesystem Capabilities</h3>
                 <p className="text-xs text-stone-700 leading-normal">
-                  Strict boundary assertions ensuring plugins cannot read directories outside their designated temporary sandbox workspace.
+                  Submitted evidence may declare filesystem capabilities for charter comparison. UpdateSeal records a verdict from that evidence; it does not enforce a runtime filesystem sandbox.
                 </p>
               </div>
               <div className="mt-6 pt-4 border-t border-stone-300 flex items-center justify-between text-[11px] font-mono">
-                <span>Directory jail</span>
-                <span className="text-emerald-700 font-bold">Sandbox OK</span>
+                <span>Evidence-declared paths</span>
+                <span className="text-emerald-700 font-bold">Charter check</span>
               </div>
             </div>
 
@@ -305,12 +310,12 @@ export const LandingPage: React.FC = () => {
                 </div>
                 <h3 className="text-xl font-bold uppercase tracking-tight mb-2 text-white font-sans">Cryptographic Verdict</h3>
                 <p className="text-xs text-stone-300 leading-normal">
-                  Signed contract transaction permanently recorded on GenLayer Studio Next. Clients query with 1 line of code.
+                  The stored result contains the consensus-backed status, findings, evaluation attempts, and decision hash. Studio-dev is a preview network that may reset.
                 </p>
               </div>
               <div className="mt-6 pt-4 border-t border-stone-700 flex items-center justify-between text-[11px] font-mono">
                 <span>Chain 61997</span>
-                <span className="text-brand-pastelYellow font-bold">Immutable</span>
+                <span className="text-brand-pastelYellow font-bold">On-chain record</span>
               </div>
             </div>
           </div>
@@ -413,7 +418,7 @@ export const LandingPage: React.FC = () => {
                   EVIDENCE 404
                 </h3>
                 <p className="text-xs text-stone-600 leading-relaxed mb-4">
-                  Git repository unreachable, commit SHA does not match IPFS tree hash, or build artifact cannot be verified.
+                  The contract verifies raw GitHub evidence bytes against the submitted SHA-256. This verdict is recorded when those bytes cannot be fetched or the hash does not match.
                 </p>
               </div>
               <div className="font-mono text-[11px] bg-stone-100 p-2 border border-stone-200">
@@ -463,9 +468,9 @@ export const LandingPage: React.FC = () => {
             </div>
             <div className="p-5 bg-white border-2 border-brand-charcoal shadow-[3px_3px_0px_#0B130E]">
               <div className="text-2xl font-black text-brand-orange mb-2 font-mono">04</div>
-              <h4 className="font-bold uppercase text-sm mb-2 font-sans">Permanent Seal</h4>
+              <h4 className="font-bold uppercase text-sm mb-2 font-sans">Stored Verdict</h4>
               <p className="text-xs text-stone-600 leading-normal">
-                The final verdict (0x01 - 0x04) will record after contract deployment with detailed reasoning hash and individual node signatures.
+                The stored result contains the consensus-backed status, findings, evaluation attempts, and decision hash. Individual validator signatures are not stored.
               </p>
             </div>
             <div className="p-5 bg-brand-charcoal text-white border-2 border-brand-charcoal shadow-[3px_3px_0px_#EF5313]">
@@ -489,7 +494,7 @@ export const LandingPage: React.FC = () => {
                 Register Your Agent’s Baseline Charter
               </h3>
               <p className="text-stone-400 text-sm leading-relaxed mb-6">
-                Give your enterprise customers and DAO stakeholders cryptographic proof that your autonomous software will never undergo silent capability inflation.
+                A verdict provides auditable evidence for downstream release policy; it is not a guarantee that the software is vulnerability-free or incapable of future drift.
               </p>
             </div>
             <div>

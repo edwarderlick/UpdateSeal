@@ -45,6 +45,9 @@ export class UpdateSealError extends Error {
   }
 }
 
+export const STUDIO_DEV_RPC_UNAVAILABLE_MESSAGE =
+  'Studio-dev RPC is temporarily unavailable or rate-limited.';
+
 export function toUpdateSealError(error: unknown, fallbackCode: UpdateSealErrorCode = 'INDEX_READ_FAILED'): UpdateSealError {
   if (error instanceof UpdateSealError) {
     return error;
@@ -53,6 +56,14 @@ export function toUpdateSealError(error: unknown, fallbackCode: UpdateSealErrorC
   const raw = error instanceof Error ? error.message : String(error);
   const lower = raw.toLowerCase();
   if (
+    lower.includes('429') ||
+    lower.includes('rate limit') ||
+    lower.includes('rate-limit') ||
+    lower.includes('too many requests')
+  ) {
+    return new UpdateSealError('RPC_UNAVAILABLE', STUDIO_DEV_RPC_UNAVAILABLE_MESSAGE);
+  }
+  if (
     lower.includes('fetch failed') ||
     lower.includes('failed to fetch') ||
     lower.includes('network') ||
@@ -60,7 +71,7 @@ export function toUpdateSealError(error: unknown, fallbackCode: UpdateSealErrorC
     lower.includes('econnreset') ||
     lower.includes('timeout')
   ) {
-    return new UpdateSealError('RPC_UNAVAILABLE', 'Studio-dev RPC is unavailable. The registry could not be read.');
+    return new UpdateSealError('RPC_UNAVAILABLE', STUDIO_DEV_RPC_UNAVAILABLE_MESSAGE);
   }
 
   return new UpdateSealError(fallbackCode, 'On-chain registry read failed.');

@@ -20,7 +20,12 @@ import { registryQueryKeys } from './registryQueryKeys';
 
 const LIVE_QUERY_OPTIONS = {
   staleTime: 30_000,
-  retry: 2,
+  retry: (failureCount: number, error: Error) => {
+    if (error instanceof UpdateSealError && error.code === 'RPC_UNAVAILABLE') {
+      return false;
+    }
+    return failureCount < 2;
+  },
   retryDelay: (attemptIndex: number) => Math.min(1000 * 2 ** attemptIndex, 5000),
   refetchOnWindowFocus: false as const,
 };

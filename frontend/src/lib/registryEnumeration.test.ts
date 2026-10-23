@@ -202,7 +202,7 @@ describe('registry enumeration', () => {
     getPackageUidAt.mockImplementation(async (index: number) => (index === 0 ? LEGACY.package_uid : OFFICIAL.package_uid));
     getPackage.mockImplementation(async (uid: string) => {
       if (uid === LEGACY.package_uid) {
-        throw new Error('invalid package payload');
+        return { ...LEGACY, charter_hash: 'not-a-hash' };
       }
       return OFFICIAL;
     });
@@ -210,6 +210,13 @@ describe('registry enumeration', () => {
     expect(page.items).toHaveLength(2);
     expect(page.items.some((item) => item.kind === 'integrity')).toBe(true);
     expect(page.items.some((item) => item.kind === 'ok' && item.id === OFFICIAL.package_uid)).toBe(true);
+  });
+
+  it('rethrows required package record-read failures instead of converting them to integrity items', async () => {
+    getPackageCount.mockResolvedValue(2);
+    getPackageUidAt.mockImplementation(async (index: number) => (index === 0 ? LEGACY.package_uid : OFFICIAL.package_uid));
+    getPackage.mockRejectedValue(new Error('429 Too Many Requests'));
+    await expect(loadPackagePage()).rejects.toThrow(/429|Too Many Requests/);
   });
 
   it('malformed finding codes become an integrity record', () => {
